@@ -1,0 +1,14 @@
+{% block content %}
+
+<div class="some">
+<h1>{{ title }}</h1>
+<hr/>
+
+<form method="POST" action="{{ get_creds }}">
+{% csrf_token %}
+{{ form.as_ul }}
+<input type="submit" name="" value="{{ title }}">
+
+</form>
+</div>
+{% endblock content %}

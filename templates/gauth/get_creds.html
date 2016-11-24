@@ -1,0 +1,10 @@
+<p>
+   <ul>
+   <p>{{request.user.id}}</p>
+   {% if user and not user.is_anonymous %}
+    {{user.id}}
+   {% else %}
+    <p>such a mistake</p>
+   {% endif %}
+   </ul>
+ </p>
