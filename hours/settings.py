@@ -22,8 +22,9 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = yamjam()['hours']['DJANGO_SECRET_KEY']
-SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = yamjam()['hours']['GOOGLE_CLIENT_ID']
-SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = yamjam()['hours']['GOOGLE_CLIENT_SECRET']
+GOOGLE_OAUTH2_CLIENT_ID = yamjam()['hours']['GOOGLE_CLIENT_ID']
+GOOGLE_OAUTH2_CLIENT_SECRET = yamjam()['hours']['GOOGLE_CLIENT_SECRET']
+
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -41,7 +42,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'gauth',
-    'social.apps.django_app.default',
+    'accounts',
 ]
 
 MIDDLEWARE = [
@@ -65,21 +66,13 @@ TEMPLATES = [
         'OPTIONS': {
             'context_processors': [
                    'django.contrib.auth.context_processors.auth',
-                   'django.core.context_processors.debug',
-                   'django.core.context_processors.i18n',
-                   'django.core.context_processors.media',
-                   'django.core.context_processors.static',
-                   'django.core.context_processors.tz',
                    'django.contrib.messages.context_processors.messages',
-                   'social.apps.django_app.context_processors.backends',
-                   'social.apps.django_app.context_processors.login_redirect',
             ],
         },
     },
 ]
 
 AUTHENTICATION_BACKENDS = (
-   'social.backends.google.GoogleOAuth2',
    'django.contrib.auth.backends.ModelBackend',
 )
 

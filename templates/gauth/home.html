@@ -3,6 +3,8 @@
 {% block main %}
  <div>
  <h1>authentication demo</h1>
+ <p>{{request.get_full_path}}</p>
+ <a href="{% url 'register' %}">Registration</a>
 
  <p>
    <ul>
@@ -15,7 +17,7 @@
      </li>
    {% else %}
      <li>
-       <a href="{% url 'social:begin' 'google-oauth2' %}?next={{ request.path }}">Login with Google</a>     
+       <a href="{% url 'register' %}?next=/oauth2redirect">Login with Google</a>     
      </li>
    {% endif %}
    </ul>

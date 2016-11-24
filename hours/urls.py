@@ -16,12 +16,18 @@ Including another URLconf
 from django.conf.urls import url, include
 from django.contrib import admin
 from gauth import views
+from accounts.views import login_view, logout_view, register_view
 
 admin.autodiscover()
 
 urlpatterns = [
     url(r'^$', views.home, name='home'),
+
+    url(r'^accounts/login/', login_view, name='login'), # why do i need accounts here?
+    url(r'^register/', register_view, name='register'),
+    url(r'^logout/', logout_view, name='logout'),
+
+    url(r'^get_creds/', views.get_creds, name='get_creds'),
+    url(r'^oauth2/redirect/', views.oauth2redirect, name='oauth2redirect'),
     url(r'^admin/', include(admin.site.urls)),
-    url('', include('social.apps.django_app.urls', namespace='social')),
-    url('', include('django.contrib.auth.urls', namespace='auth')),
 ]
