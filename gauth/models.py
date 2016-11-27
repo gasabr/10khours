@@ -12,6 +12,10 @@ class CredentialsModel(models.Model):
         db_table = 'credentials'
 
 
+    def __str__():
+    	return 'creds for '+id.username
+
+
 # to be able to see credentials in admin
 class CredentialsAdmin(admin.ModelAdmin):
     pass

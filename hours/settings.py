@@ -29,6 +29,12 @@ GOOGLE_OAUTH2_CLIENT_SECRET = yamjam()['hours']['GOOGLE_CLIENT_SECRET']
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
+LOCAL = True
+
+if LOCAL:
+    GOOGLE_REDIRECT = 'http://127.0.0.1:8000/oauth2/redirect/'
+else:
+    GOOGLE_REDIRECT = 'http://10khours.ru/oauth2/redirect/'
 ALLOWED_HOSTS = ['10khours.ru']
 
 
@@ -116,7 +122,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Europe/Moscow'
 
 USE_I18N = True
 

@@ -16,15 +16,15 @@ from . import handler
 
 @login_required
 def viz(request):
-  """
-  view which will handle plotting
-  """
-  h = handler.Handler(request.user.username)
-  omg = h.get_calendars_summary()
-  f = 'oops'  
-  form = ChoiceForm(request.GET or None, calendars_list=omg)
-  if form.is_valid():
-    f = h.create_graphs([form.cleaned_data['calendar']], [form.cleaned_data['period']])
-    return render(request, 'viz/viz.html', {'form': form, 'path': str(f[0])})
-  
-  return render(request, 'viz/viz.html', {'form': form, 'path': f})
+    """
+    view which will handle plotting
+    """
+    h = handler.Handler(request.user.username)
+    summaries = h.get_calendars_summary()
+    f = 'oops'  
+    form = ChoiceForm(request.GET or None, calendars_list=summaries)
+    if form.is_valid():
+        f = h.create_graphs([form.cleaned_data['calendar']], [form.cleaned_data['period']])
+        return render(request, 'viz/viz.html', {'form': form, 'path': str(f[0])})
+    
+    return render(request, 'viz/viz.html', {'form': form, 'path': f})

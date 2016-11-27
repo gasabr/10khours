@@ -37,8 +37,6 @@ class UserRegistraterForm(forms.ModelForm):
     email = forms.EmailField(label='Enter email')
     email2 = forms.EmailField(label='Confirm email')
     password = forms.CharField(widget=forms.PasswordInput)
-    # password2 = forms.CharField(widget=forms.PasswordInput, label='Confirm password')
-
 
     class Meta:
         model = User
@@ -47,17 +45,7 @@ class UserRegistraterForm(forms.ModelForm):
             'email',
             'email2',
             'password',
-            # 'password2',
         ]
-
-    # def clean_password2(self):
-    #     password = self.cleaned_data.get('password')
-    #     password2 = self.cleaned_data.get('password2')
-
-    #     if password != password2:
-    #         forms.ValidationError('Passwords must match.')
-
-    #     return password 
 
     def clean_email2(self):
         email = self.cleaned_data.get('email')

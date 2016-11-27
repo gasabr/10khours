@@ -25,8 +25,10 @@ def get_flow(request):
     flow = OAuth2WebServerFlow(
         client_id=settings.GOOGLE_OAUTH2_CLIENT_ID,
         client_secret=settings.GOOGLE_OAUTH2_CLIENT_SECRET,
-        scope='https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/calendar',
-        redirect_uri='http://10khours.ru/oauth2/redirect/',
+        scope=("https://www.googleapis.com/auth/userinfo.email ",
+               "https://www.googleapis.com/auth/userinfo.profile ",
+               "https://www.googleapis.com/auth/calendar"),
+        redirect_uri=settings.GOOGLE_REDIRECT,
         access_type='offline',
     )
 
@@ -34,14 +36,18 @@ def get_flow(request):
 
 
 def home(request):
-   context = RequestContext(request,
-                           {'request': request,
-                            'user': request.user})
+   context = RequestContext(request, {
+                            'request': request,
+                            'user': request.user })
    return render_to_response('gauth/home.html',
-                             context=context)
+                              context=context)
 
 
 def get_creds(request):
+    """
+    build flow
+    after successful authorizing of app redirects to user auth pages
+    """
     flow = get_flow(request)
     flow.params['state'] = xsrfutil.generate_token(settings.SECRET_KEY,
                                                        request.user.id)
@@ -52,7 +58,11 @@ def get_creds(request):
 
 
 def oauth2redirect(request):
-    print("oauth2redirect")
+    """
+    validates user token,
+    saves user credentials into db
+    redirects you to 'viz/' (viz/views.viz)
+    """
     # Make sure that the request is from who we think it is
     if not xsrfutil.validate_token(settings.SECRET_KEY,
                                    request.GET.get('state').encode('utf8'),
