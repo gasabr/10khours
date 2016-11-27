@@ -3,10 +3,11 @@
 a site that will show how you spend your time based on data from Google Calendar
 
 ### TODO:
-- forget password ...
-+ get credential for each user
-+ new registration form
-+ "except User.DoesNotExist:" this should not occur
-- clear db from `python-social-auth`
-- tests
+
+- Period model
+- restoring password
+- refreshing tokens
+
+
+- tests for everything
 - should pickle be listed in requirements?
