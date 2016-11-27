@@ -2,7 +2,7 @@
 
 a site that will show how you spend your time based on data from Google Calendar
 
-### TODO:
+### Goals:
 
 - Period model
 - restoring password
@@ -10,4 +10,3 @@ a site that will show how you spend your time based on data from Google Calendar
 
 
 - tests for everything
-- should pickle be listed in requirements?
