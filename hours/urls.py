@@ -16,7 +16,11 @@ Including another URLconf
 from django.conf.urls import url, include
 from django.contrib import admin
 from gauth import views
-from accounts.views import login_view, logout_view, register_view
+from accounts.views import (login_view, logout_view, register_view)
+from viz.views import viz
+# for managing static files
+from django.conf import settings
+from django.conf.urls.static import static
 
 admin.autodiscover()
 
@@ -30,4 +34,6 @@ urlpatterns = [
     url(r'^get_creds/', views.get_creds, name='get_creds'),
     url(r'^oauth2/redirect/', views.oauth2redirect, name='oauth2redirect'),
     url(r'^admin/', include(admin.site.urls)),
-]
+
+    url(r'^viz/', viz, name='viz'),
+] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

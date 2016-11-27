@@ -23,10 +23,10 @@ from oauth2client.contrib.django_util.storage import DjangoORMStorage
 
 def get_flow(request):    
     flow = OAuth2WebServerFlow(
-        client_id=yamjam()['hours']['GOOGLE_CLIENT_ID'],
-        client_secret=yamjam()['hours']['GOOGLE_CLIENT_SECRET'],
+        client_id=settings.GOOGLE_OAUTH2_CLIENT_ID,
+        client_secret=settings.GOOGLE_OAUTH2_CLIENT_SECRET,
         scope='https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/calendar',
-        redirect_uri='http://127.0.0.1:8000/oauth2/redirect/',
+        redirect_uri='http://10khours.ru/oauth2/redirect/',
         access_type='offline',
     )
 
@@ -43,8 +43,6 @@ def home(request):
 
 def get_creds(request):
     flow = get_flow(request)
-    # generate token takes USER_ID
-    # and user should already be authenticated!!!
     flow.params['state'] = xsrfutil.generate_token(settings.SECRET_KEY,
                                                        request.user.id)
     request.session['flow'] = pickle.dumps(flow).decode('iso-8859-1')
@@ -72,46 +70,24 @@ def oauth2redirect(request):
         request.session['creds'] = credentials.to_json()
         email = credentials.id_token.get("email")
         user = User.objects.get(email=email)
-        # user_exists = False
-        # try:
-        #     user = User.objects.get(email=email)
-        #     user_exists = True
-        # except User.DoesNotExist:
-        #     print("NEW USER CREATED!")
-        #     um = UserManager()
-        #     user = get_user_model().objects.create_user(username=email, email=email)
 
         # Since we've oauth2'd the user, we should set the backend appropriately
         # This is usually done by the authenticate() method.
         user.backend = 'django.contrib.auth.backends.ModelBackend'
-
-        print(type(credentials))
 
         # Refresh token is needed for renewing google api access token
         if credentials.refresh_token:
             user.refresh_token = credentials.refresh_token
         user.save()
 
-        storage = DjangoORMStorage(CredentialsModel, 'user_id', user.id, 'credentials')
-        print(type(credentials))
+        storage = DjangoORMStorage(CredentialsModel, 'id', user, 'credentials')
         storage.put(credentials)
 
         # Register that the user has successfully logged in
         auth_login(request, user)
 
-        # nxt = request.session.get('next', reverse_lazy('l/'))
+        return redirect('viz')
 
-        if request.method == "POST":
-            print("it's post")
-            return HttpResponseRedirect(reverse_lazy('/'))
-        else:
-            # form = SuccessfulAuthForm()
-            # form.email = user.email
-            # form.user_id = user.id
-            print("it's get")
-            return render(request, 'gauth/success.html', {})
-
-        return HttpResponseRedirect(nxt)
     elif code is None and error:
         return HttpResponse(str(error))
     else:
