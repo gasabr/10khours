@@ -16,6 +16,14 @@ from YamJam import yamjam
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
+# for yamjam working properly on server
+cur_user = os.getenv('USER')
+
+ROOT_DIR = os.path.expanduser('~/')
+
+if '10khoursru' is cur_user:
+    ROOT_DIR = os.path.dirname(os.path.dirname(ROOT_DIR))
+
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/1.10/howto/deployment/checklist/
