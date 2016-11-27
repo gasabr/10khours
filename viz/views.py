@@ -28,7 +28,6 @@ def viz(request):
                             [form.cleaned_data['period']])
                             
         return render(request, 'viz/viz.html', {'form'  : form, 
-                                                'path'  : kk,
                                                 'images': images})
     
-    return render(request, 'viz/viz.html', {'form'   : form, 'path'   : f})
+    return render(request, 'viz/viz.html', {'form'   : form, 'path' : f})

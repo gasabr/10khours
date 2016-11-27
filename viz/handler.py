@@ -173,9 +173,14 @@ class Handler():
         events_series = self.spread_events(self.fetch_events(calendars, P), P)
         
         # create folder to store images
-        folder  = os.path.join(settings.BASE_DIR, 'graphs/'+self.user.username+'/')
-        if not os.path.exists(folder):
-            os.makedirs(folder)
+        user_static_folder = 'graphs/'+self.user.username+'/'
+        full_path  = os.path.join(settings.STATIC_ROOT, user_static_folder)
+        if not os.path.exists(full_path):
+            os.makedirs(full_path)
+        file_name = 'bar.png'
+        
+        if os.path.exists(full_path+file_name):
+            os.remove(full_path+file_name)
         
         tmp_period = periods[0]
         D = []
@@ -186,11 +191,12 @@ class Handler():
                 if e[P[0]['type']] == bound:
                     D[index] += get_duration(e)
                     
-        image_path = folder+'bar.png'    
+        image_path = '/static/'+user_static_folder+file_name    
             
         plt.bar([l for l, _ in enumerate(D)], height=D)
         plt.grid(True)
-        plt.savefig(image_path)
+        plt.savefig(full_path+file_name)
+        plt.clf()
 
         return [image_path]
 
