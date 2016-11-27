@@ -1,5 +1,8 @@
 {{ path }}
+{% load static %}
 <form method="GET" action="">
   {{ form }}
   <input type=submit>
 </form>
+
+<img src="{% static 'graphs/bar.png' %}">
