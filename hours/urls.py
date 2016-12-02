@@ -26,7 +26,7 @@ admin.autodiscover()
 
 urlpatterns = [
     url(r'^$', views.home, name='home'),
-
+    
     url(r'^accounts/login/', login_view, name='login'), # why do i need accounts here?
     url(r'^register/', register_view, name='register'),
     url(r'^logout/', logout_view, name='logout'),

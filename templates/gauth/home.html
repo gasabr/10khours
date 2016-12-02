@@ -3,7 +3,6 @@
 {% block main %}
  <div>
  <h1>authentication demo</h1>
- <p>{{request.get_full_path}}</p>
  <a href="{% url 'register' %}">Registration</a>
 
  <p>
@@ -13,7 +12,10 @@
        <a>Hello {{ user.get_full_name|default:user.username }}!</a>
      </li>
      <li>
-       <a href="{% url 'auth:logout' %}?next={{ request.path }}">Logout</a>
+       <a href="{% url 'viz' %}?next={{ request.path }}">Get Visualisation</a>
+     </li>
+     <li>
+       <a href="{% url 'logout' %}?next={{ request.path }}">Logout</a>
      </li>
    {% else %}
      <li>

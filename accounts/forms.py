@@ -10,14 +10,15 @@ User = get_user_model()
 
 
 class UserLoginForm(forms.Form):
-    username = forms.CharField()
+    email    = forms.EmailField()
     password = forms.CharField(widget=forms.PasswordInput)
 
     def clean(self, *args, **kwargs):
-        username = self.cleaned_data.get('username')
+        email    = self.cleaned_data.get('email')
         password = self.cleaned_data.get('password')
 
-        if username and password:
+        if email and password:
+            username = User.objects.get(email=email).username
             user = authenticate(username=username, password=password)
 
             if not user:
@@ -43,7 +44,6 @@ class UserRegistraterForm(forms.ModelForm):
         fields = [
             'email',
             'password',
-            # 'password2',
         ]
 
     def clean_email2(self):

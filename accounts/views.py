@@ -18,18 +18,19 @@ def login_view(request):
 	title = 'Login and check credentials'
 	form = UserLoginForm(request.POST or None)
 	if form.is_valid():
-		username = form.cleaned_data.get('username')
+		email    = form.cleaned_data.get('email')
 		password = form.cleaned_data.get('password')
 
-		user = authenticate(username=username, password=password)
+		user = get_user_model().objects.get(email=email)
 		login(request, user)
 
 		try:
-			creds = CredentialsModel.objects.get(id__username=username).credentials
+			creds = CredentialsModel.objects.get(id__email=email).credentials
 		except CredentialsModel.DoesNotExist as e:
-			# if creds were deleted
+			# if creds were deleted or died
 			return redirect('get_creds')
 
+        # TODO: change this to proprietary statement
 		if creds.access_token_expired:
 			try:
 				creds.refresh(httplib2.Http())
@@ -38,6 +39,8 @@ def login_view(request):
 				return redirect('get_creds')
 			else:
 				return redirect('get_creds')
+		else:
+		    redirect('viz')
 
 	return render(request, "accounts/form.html", {"form": form, "title": title})
 
@@ -45,7 +48,7 @@ def login_view(request):
 @login_required
 def logout_view(request):
 	logout(request)
-	return render(request, "accounts/form.html", {})
+	return redirect('login')
 
 
 def register_view(request):
