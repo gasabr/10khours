@@ -24,7 +24,10 @@ def viz(request):
     f = 'oops'  
     form = ChoiceForm(request.GET or None, calendars_list=summaries)
     if form.is_valid():
-        f = h.create_graphs([form.cleaned_data['calendar']], [form.cleaned_data['period']])
-        return render(request, 'viz/viz.html', {'form': form, 'path': str(f[0])})
+        images = h.create_graphs([form.cleaned_data['calendar']], 
+                            [form.cleaned_data['period']])
+                            
+        return render(request, 'viz/viz.html', {'form'  : form, 
+                                                'images': images})
     
-    return render(request, 'viz/viz.html', {'form': form, 'path': f})
+    return render(request, 'viz/viz.html', {'form'   : form, 'path' : f})

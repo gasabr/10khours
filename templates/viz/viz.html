@@ -1,5 +1,10 @@
 {{ path }}
+{% load static %}
 <form method="GET" action="">
   {{ form }}
   <input type=submit>
 </form>
+
+{% for img_path in images %}
+  <img src="{{ img_path  }}">
+{% endfor %}

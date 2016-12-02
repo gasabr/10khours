@@ -21,7 +21,7 @@ cur_user = os.getenv('USER')
 
 ROOT_DIR = os.path.expanduser('~/')
 
-if '10khoursru' is cur_user:
+if '10khourslru' in cur_user:
     ROOT_DIR = os.path.dirname(os.path.dirname(ROOT_DIR))
 
 
@@ -29,20 +29,21 @@ if '10khoursru' is cur_user:
 # See https://docs.djangoproject.com/en/1.10/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = yamjam()['hours']['DJANGO_SECRET_KEY']
-GOOGLE_OAUTH2_CLIENT_ID = yamjam()['hours']['GOOGLE_CLIENT_ID']
-GOOGLE_OAUTH2_CLIENT_SECRET = yamjam()['hours']['GOOGLE_CLIENT_SECRET']
+SECRET_KEY = yamjam(os.path.join(ROOT_DIR, '.yamjam/config.yaml'))['hours']['DJANGO_SECRET_KEY']
+GOOGLE_OAUTH2_CLIENT_ID = yamjam(os.path.join(ROOT_DIR, '.yamjam/config.yaml'))['hours']['GOOGLE_CLIENT_ID']
+GOOGLE_OAUTH2_CLIENT_SECRET = yamjam(os.path.join(ROOT_DIR, '.yamjam/config.yaml'))['hours']['GOOGLE_CLIENT_SECRET']
 
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-LOCAL = True
+LOCAL = False
 
 if LOCAL:
     GOOGLE_REDIRECT = 'http://127.0.0.1:8000/oauth2/redirect/'
 else:
     GOOGLE_REDIRECT = 'http://10khours.ru/oauth2/redirect/'
+    
 ALLOWED_HOSTS = ['10khours.ru']
 
 
