@@ -47,8 +47,8 @@ class Handler():
             print("oops")
 
         # build service to get access to API
-        http = self.creds.authorize(httplib2.Http())
-        self.service = discovery.build('calendar', 'v3', http=http)
+        self.http = self.creds.authorize(httplib2.Http())
+        self.service = discovery.build('calendar', 'v3', http=self.http)
 
         # calendars in list of dictionaries
         current_calendars = self.service.calendarList().list().execute().get('items', [])   
@@ -62,6 +62,19 @@ class Handler():
                                                       user=user, 
                                                       name=c['summary'])                                      
                 new_cm.save()
+    
+          
+    def get_access_token(self):
+        return self.creds.get_access_token()
+        
+        
+    def token_need_renovation(self):
+        """
+        will return True if credentials.access_token.expires_in < 5 minutes
+        False otherwise
+        """
+        expires_in = self.creds.get_access_token().expires_in
+        return True if expires_in < 1200 else False
         
                 
     def create_periods(self, periods):
@@ -108,6 +121,7 @@ class Handler():
                       'bounds': bounds}
                     )
         return P
+       
                                 
     def get_bounds(self, periods, period_type):
         for p in periods:
@@ -168,6 +182,9 @@ class Handler():
         plots it with matplolib
         saves images in /BASE_DIR/<username> 
         """
+        if self.token_need_renovation():
+            h = self.creds.authorize(httplib2.Http())
+            self.creds.refresh(self.http)
         # prepare data
         P = self.create_periods(periods)
         events_series = self.spread_events(self.fetch_events(calendars, P), P)

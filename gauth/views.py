@@ -30,6 +30,7 @@ def get_flow(request):
                "https://www.googleapis.com/auth/calendar"),
         redirect_uri=settings.GOOGLE_REDIRECT,
         access_type='offline',
+        prompt="consent",
     )
 
     return flow
@@ -45,7 +46,7 @@ def home(request):
 
 def get_creds(request):
     """
-    build flow
+    builds flow
     after successful authorizing of app redirects to user auth pages
     """
     flow = get_flow(request)

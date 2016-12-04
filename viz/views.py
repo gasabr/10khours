@@ -17,17 +17,20 @@ from . import handler
 @login_required
 def viz(request):
     """
-    view which will handle plotting
+    view with visualization of the data
     """
     h = handler.Handler(request.user.username)
     summaries = h.get_calendars_summary()
-    f = 'oops'  
+    f = 'oops'
     form = ChoiceForm(request.GET or None, calendars_list=summaries)
     if form.is_valid():
         images = h.create_graphs([form.cleaned_data['calendar']], 
                             [form.cleaned_data['period']])
+        e = "your token expires in "+str(h.get_access_token().expires_in)+" sec."
+        # return a
                             
         return render(request, 'viz/viz.html', {'form'  : form, 
-                                                'images': images})
+                                                'images': images,
+                                                'expires_in': e})
     
     return render(request, 'viz/viz.html', {'form'   : form, 'path' : f})
