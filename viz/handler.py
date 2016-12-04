@@ -14,24 +14,71 @@ from gauth.models import CredentialsModel
 from django.contrib.auth.models import User
 
 PERIODS = ['this_month', 'this_week', 'today']
+# <any/few>_<PERIOD>
+# <any> - one calendar
+# <few> - some calendars
+PERIOD_TO_GRAPH = {'any_this_month': ['bar', 'bar_sum'],
+                   'any_this_week' : ['bar', 'multi_bar'],
+                   'any_day'       : ['pie', 'timeline'],  
+                  }
 
 
 def get_duration(event):
     """
     event is { 'start': {'dataTime' : datetime.datetime(),},
-               'end': {'dataTime' : datetime.datetime(),},
+               'end'  : {'dataTime' : datetime.datetime(),},
                ...
     returns difference in hours
     """
-    end = datetime.strptime(event['end']['dateTime'], '%Y-%m-%dT%H:%M:%S+03:00')
     start = datetime.strptime(event['start']['dateTime'], '%Y-%m-%dT%H:%M:%S+03:00')
+    end   = datetime.strptime(event['end']['dateTime'], '%Y-%m-%dT%H:%M:%S+03:00')
     return float((end-start).seconds / 60) / 60
+    
+
+def spread_events(calendars, periods):
+    """
+    will add to each event field with name of period,
+    equal to start of the period which this event belongs to
+    """
+    for e in calendars:
+        period_type, bounds, delta = periods[0]['type'], periods[0]['bounds'], periods[0]['delta']
+        # spread events depends on period type
+        for i in e['items']:
+            period_start = bounds[0]
+            event_start = datetime.strptime(i['start']['dateTime'], '%Y-%m-%dT%H:%M:%S+03:00')
+            while period_start < event_start:
+                period_start += delta
+            i[e['period_type']] = period_start
+                
+    return calendars
+    
+def get_distribution(calendars, periods):
+    """
+    IT WORKS ONLY FOR THE FIRST CALENDAR
+    """
+    bar = []
+    sum_bar = []
+    for index, bound in enumerate(periods[0]['bounds']):
+        if index >= len(bar):
+            bar.append(0)
+            sum_bar.append(sum_bar[index-1] if index > 0 else 0)
+        for e in calendars[0]['items']:
+            e_duration = get_duration(e)
+            # check if event belongs to current period
+            if e[periods[0]['type']] == bound:
+                bar[index] += e_duration
+                sum_bar[index] += e_duration if index > 0 else e_duration
+
+    return {'bar'    : bar,
+            'sum_bar': sum_bar,
+           }
+    
 
 class Handler():
     """
     Class to handle all operations on viz view (@viz/views.py) such that:
       - getting credentials from username, checking expiration time
-      - getting list of calendars from Google Api, updating CalendarsModel
+      - getting list of calendars from Google API
       - plotting data, saving graphs
     """
     def __init__(self, username):
@@ -151,22 +198,6 @@ class Handler():
                             )
 
         return events
-        
-    
-    def spread_events(self, events, periods):
-        X = []
-        for e in events:
-            e['items_in_periods'] = {}
-            bounds, delta = self.get_bounds(periods, e['period_type'])
-            # X = [map(str, x) for x in bounds]
-            for i in e['items']:
-                period_start = bounds[0]
-                event_start = datetime.strptime(i['start']['dateTime'], '%Y-%m-%dT%H:%M:%S+03:00')
-                while period_start < event_start:
-                    period_start += delta
-                i[e['period_type']] = period_start
-                
-        return events
 
 
     def get_calendars_summary(self):
@@ -176,7 +207,7 @@ class Handler():
         return [(x.id, x.name) for x in CalendarModel.objects.all().filter(user__username=self.user.username)]
 
 
-    def create_graphs(self, calendars, periods):
+    def create_graphs(self, calendars, input_periods):
         """
         takes what to show on graphs in 2 lists
         plots it with matplolib
@@ -186,8 +217,10 @@ class Handler():
             h = self.creds.authorize(httplib2.Http())
             self.creds.refresh(self.http)
         # prepare data
-        P = self.create_periods(periods)
-        events_series = self.spread_events(self.fetch_events(calendars, P), P)
+        periods = self.create_periods(input_periods)
+        events_in_period        = self.fetch_events(calendars, periods)
+        events_marked_with_time = spread_events(events_in_period, periods)
+        events_distribution     = get_distribution(events_marked_with_time, periods)['sum_bar']
         
         # create folder to store images
         user_static_folder = 'graphs/'+self.user.username+'/'
@@ -199,18 +232,10 @@ class Handler():
         if os.path.exists(full_path+file_name):
             os.remove(full_path+file_name)
         
-        tmp_period = periods[0]
-        D = []
-        for index, bound in enumerate(P[0]['bounds']):
-            if index >= len(D):
-                D.append(0)
-            for e in events_series[0]['items']:
-                if e[P[0]['type']] == bound:
-                    D[index] += get_duration(e)
-                    
         image_path = '/static/'+user_static_folder+file_name    
             
-        plt.bar([l for l, _ in enumerate(D)], height=D)
+        plt.bar([l for l, _ in enumerate(events_distribution)], 
+                height=events_distribution)
         plt.grid(True)
         plt.savefig(full_path+file_name)
         plt.clf()

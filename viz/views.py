@@ -19,13 +19,15 @@ def viz(request):
     """
     view with visualization of the data
     """
+    # on creation will check current list of calendars and refresh it if needed
     h = handler.Handler(request.user.username)
+    # get tuples (calendar_id, title_of_calendar)
     summaries = h.get_calendars_summary()
     f = 'oops'
     form = ChoiceForm(request.GET or None, calendars_list=summaries)
     if form.is_valid():
         images = h.create_graphs([form.cleaned_data['calendar']], 
-                            [form.cleaned_data['period']])
+                                 [form.cleaned_data['period']])
         e = "your token expires in "+str(h.get_access_token().expires_in)+" sec."
         # return a
                             
