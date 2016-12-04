@@ -44,8 +44,13 @@ def spread_events(calendars, periods):
         period_type, bounds, delta = periods[0]['type'], periods[0]['bounds'], periods[0]['delta']
         # spread events depends on period type
         for i in e['items']:
+            # if i['status'] == 'cancelled':
+            #     continue
+            #     return a
             period_start = bounds[0]
-            event_start = datetime.strptime(i['start']['dateTime'], '%Y-%m-%dT%H:%M:%S+03:00')
+            event_start = datetime.strptime(i['start']['dateTime'], 
+                                        '%Y-%m-%dT%H:%M:%S+03:00')
+                
             while period_start < event_start:
                 period_start += delta
             i[e['period_type']] = period_start
@@ -72,6 +77,20 @@ def get_distribution(calendars, periods):
     return {'bar'    : bar,
             'sum_bar': sum_bar,
            }
+           
+def check_or_create_path(username):
+    user_static_folder = 'graphs/'+username+'/'
+    full_path  = os.path.join(settings.STATIC_ROOT, user_static_folder)
+    if not os.path.exists(full_path):
+        os.makedirs(full_path)
+    filename = 'bar.png'
+        
+    if os.path.exists(full_path+filename):
+        os.remove(full_path+filename)
+        
+    image_path = '/static/'+user_static_folder+filename 
+    
+    return (full_path, filename, image_path)
     
 
 class Handler():
@@ -191,6 +210,11 @@ class Handler():
                                                      timeMax=timeMax,
                                                      timeMin=timeMin
                                                     ).execute().get('items', [])
+                for i in items:
+                    if i['status'] == 'cancelled':
+                        items.remove(i)
+                    if not 'dateTime' in i['start'].keys():
+                        items.remove(i)
                                                   
                 events.append({'calendarId' : c_id,
                                'period_type': period['type'],
@@ -220,24 +244,16 @@ class Handler():
         periods = self.create_periods(input_periods)
         events_in_period        = self.fetch_events(calendars, periods)
         events_marked_with_time = spread_events(events_in_period, periods)
-        events_distribution     = get_distribution(events_marked_with_time, periods)['sum_bar']
+        events_distribution     = get_distribution(events_marked_with_time, periods)['bar']
         
         # create folder to store images
-        user_static_folder = 'graphs/'+self.user.username+'/'
-        full_path  = os.path.join(settings.STATIC_ROOT, user_static_folder)
-        if not os.path.exists(full_path):
-            os.makedirs(full_path)
-        file_name = 'bar.png'
-        
-        if os.path.exists(full_path+file_name):
-            os.remove(full_path+file_name)
-        
-        image_path = '/static/'+user_static_folder+file_name    
+        full_path, filename, image_path = check_or_create_path(self.user.username)
+
             
         plt.bar([l for l, _ in enumerate(events_distribution)], 
                 height=events_distribution)
         plt.grid(True)
-        plt.savefig(full_path+file_name)
+        plt.savefig(full_path+filename)
         plt.clf()
 
         return [image_path]

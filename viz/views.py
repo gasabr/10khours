@@ -26,7 +26,10 @@ def viz(request):
     f = 'oops'
     form = ChoiceForm(request.GET or None, calendars_list=summaries)
     if form.is_valid():
-        images = h.create_graphs([form.cleaned_data['calendar']], 
+        calendar = form.cleaned_data['calendar']
+        if calendar == 'primary':
+            calendar = request.user.email
+        images = h.create_graphs([calendar], 
                                  [form.cleaned_data['period']])
         e = "your token expires in "+str(h.get_access_token().expires_in)+" sec."
         # return a

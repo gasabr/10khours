@@ -20,7 +20,7 @@ class ChoiceForm(forms.Form):
     
 
     def __init__(self, *args, **kwargs):
-        calendars_list = kwargs.pop('calendars_list')+[('all', 'all')]
+        calendars_list = kwargs.pop('calendars_list')+[('primary', 'primary')]
         super(ChoiceForm, self).__init__(*args, **kwargs)
 
         self.fields['calendar'] = forms.ChoiceField(choices=calendars_list)
