@@ -2,6 +2,7 @@ from django import forms
 
 PERIODS = (
     ('this_month', 'this month'),
+    ('last_30_days', 'last 30 days'),
     ('this_week', 'this week'),
     ('today', 'today'),
 )

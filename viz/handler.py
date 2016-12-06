@@ -13,7 +13,7 @@ from .models import CalendarModel
 from gauth.models import CredentialsModel
 from django.contrib.auth.models import User
 
-PERIODS = ['this_month', 'this_week', 'today']
+PERIODS = ['this_month', 'this_30_days','this_week', 'today']
 # <any/few>_<PERIOD>
 # <any> - one calendar
 # <few> - some calendars
@@ -44,9 +44,6 @@ def spread_events(calendars, periods):
         period_type, bounds, delta = periods[0]['type'], periods[0]['bounds'], periods[0]['delta']
         # spread events depends on period type
         for i in e['items']:
-            # if i['status'] == 'cancelled':
-            #     continue
-            #     return a
             period_start = bounds[0]
             event_start = datetime.strptime(i['start']['dateTime'], 
                                         '%Y-%m-%dT%H:%M:%S+03:00')
@@ -172,6 +169,14 @@ class Handler():
                 end   = start + timedelta(days=6)
                 delta = timedelta(days=1)
                 
+            elif period_type == 'last_30_days':
+                start -= timedelta(days=30)
+                # How to make it readable?
+                # obtaining last day of the month
+                # end   = datetime.combine(date(now.year, now.month, calendar_module.monthrange(now.year, now.month)[1]),
+                #                          datetime.min.time())
+                # delta = timedelta(days=1)
+                
                 
             bounds = []
             tmp = start
@@ -213,13 +218,23 @@ class Handler():
                 for i in items:
                     if i['status'] == 'cancelled':
                         items.remove(i)
+                        continue
+                        
+                    # for all day events
                     if not 'dateTime' in i['start'].keys():
-                        items.remove(i)
+                        date_from_id = i['id'].split('_')[1]
+                        i['dateTime'] = date_from_id
+                        
+                    # for recurrent events
+                    if 'recurrence' in i.keys():
+                        pass
+                        
+                                                 
                                                   
                 events.append({'calendarId' : c_id,
                                'period_type': period['type'],
-                               'items'      : items}
-                            )
+                               'items'      : items,
+                              })
 
         return events
 
@@ -245,6 +260,8 @@ class Handler():
         events_in_period        = self.fetch_events(calendars, periods)
         events_marked_with_time = spread_events(events_in_period, periods)
         events_distribution     = get_distribution(events_marked_with_time, periods)['bar']
+        
+        return A
         
         # create folder to store images
         full_path, filename, image_path = check_or_create_path(self.user.username)
