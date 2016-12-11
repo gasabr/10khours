@@ -9,7 +9,7 @@ from datetime import datetime, timedelta, date
 import calendar as calendar_module
 from django.conf import settings
 from apiclient import discovery
-from .models import CalendarModel
+from .models import Calendar, Event
 from gauth.models import CredentialsModel
 from django.contrib.auth.models import User
 
@@ -104,27 +104,27 @@ class Handler():
         self.user = User.objects.get(username=username)
 
         # get creds from db, TODO: check should be separate function
-        self.creds = CredentialsModel.objects.get(id__username=username).credentials
-        if self.creds.access_token_expired:
-            # check time instead of expiration check
-            print("oops")
+        # self.creds = CredentialsModel.objects.get(id__username=username).credentials
+        # if self.creds.access_token_expired:
+        #     # check time instead of expiration check
+        #     print("oops")
 
-        # build service to get access to API
-        self.http = self.creds.authorize(httplib2.Http())
-        self.service = discovery.build('calendar', 'v3', http=self.http)
+        # # build service to get access to API
+        # self.http = self.creds.authorize(httplib2.Http())
+        # self.service = discovery.build('calendar', 'v3', http=self.http)
 
-        # calendars in list of dictionaries
-        current_calendars = self.service.calendarList().list().execute().get('items', [])   
+        # # calendars in list of dictionaries
+        # current_calendars = self.service.calendarList().list().execute().get('items', [])   
 
-        # if there are new calendars add them to db
-        for c in current_calendars:
-            try:
-                CalendarModel.objects.filter(id=c['id'])
-            except CalendarModel.DoesNotExist:
-                new_cm = CalendarModel.objects.create(id=c['id'], 
-                                                      user=user, 
-                                                      name=c['summary'])                                      
-                new_cm.save()
+        # # if there are new calendars add them to db
+        # for c in current_calendars:
+        #     try:
+        #         Calendar.objects.filter(id=c['id'])
+        #     except Calendar.DoesNotExist:
+        #         new_cm = Calendar.objects.create(id=c['id'], 
+        #                                          user=user, 
+        #                                          name=c['summary'])                                      
+        #         new_cm.save()
     
           
     def get_access_token(self):
@@ -243,29 +243,29 @@ class Handler():
         """
         returns [(id, name), ...,] for each calendar in db for given user
         """
-        return [(x.id, x.name) for x in CalendarModel.objects.all().filter(user__username=self.user.username)]
+        return [(x.id, x.name) for x in Calendar.objects.all().filter(user__username=self.user.username)]
 
 
     def create_graphs(self, calendars, input_periods):
         """
         takes what to show on graphs in 2 lists
         plots it with matplolib
-        saves images in /BASE_DIR/<username> 
+        saves images in /static/<username> 
         """
-        if self.token_need_renovation():
-            h = self.creds.authorize(httplib2.Http())
-            self.creds.refresh(self.http)
         # prepare data
         periods = self.create_periods(input_periods)
-        events_in_period        = self.fetch_events(calendars, periods)
-        events_marked_with_time = spread_events(events_in_period, periods)
-        events_distribution     = get_distribution(events_marked_with_time, periods)['bar']
-        
-        return A
-        
+        bounds = periods[0]['bounds']
+        events = []
+        for index, b in enumerate(bounds[:-1]):
+            events.append(Event.objects.filter(start__range=[str(b), str(bounds[bounds.index(b)+1])],
+                                               calendar__id=calendars[0]
+                                              ))
+        events_distribution = [0]*30
+        for i, qs in enumerate(events):
+            for ev in qs.values():
+                events_distribution[i] += ev['duration']
         # create folder to store images
         full_path, filename, image_path = check_or_create_path(self.user.username)
-
             
         plt.bar([l for l, _ in enumerate(events_distribution)], 
                 height=events_distribution)
