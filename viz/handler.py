@@ -21,59 +21,6 @@ PERIOD_TO_GRAPH = {'any_this_month': ['bar', 'bar_sum'],
                    'any_this_week' : ['bar', 'multi_bar'],
                    'any_day'       : ['pie', 'timeline'],  
                   }
-
-
-def get_duration(event):
-    """
-    event is { 'start': {'dataTime' : datetime.datetime(),},
-               'end'  : {'dataTime' : datetime.datetime(),},
-               ...
-    returns difference in hours
-    """
-    start = datetime.strptime(event['start']['dateTime'], '%Y-%m-%dT%H:%M:%S+03:00')
-    end   = datetime.strptime(event['end']['dateTime'], '%Y-%m-%dT%H:%M:%S+03:00')
-    return float((end-start).seconds / 60) / 60
-    
-
-def spread_events(calendars, periods):
-    """
-    will add to each event field with name of period,
-    equal to start of the period which this event belongs to
-    """
-    for e in calendars:
-        period_type, bounds, delta = periods[0]['type'], periods[0]['bounds'], periods[0]['delta']
-        # spread events depends on period type
-        for i in e['items']:
-            period_start = bounds[0]
-            event_start = datetime.strptime(i['start']['dateTime'], 
-                                        '%Y-%m-%dT%H:%M:%S+03:00')
-                
-            while period_start < event_start:
-                period_start += delta
-            i[e['period_type']] = period_start
-                
-    return calendars
-    
-def get_distribution(calendars, periods):
-    """
-    IT WORKS ONLY FOR THE FIRST CALENDAR
-    """
-    bar = []
-    sum_bar = []
-    for index, bound in enumerate(periods[0]['bounds']):
-        if index >= len(bar):
-            bar.append(0)
-            sum_bar.append(sum_bar[index-1] if index > 0 else 0)
-        for e in calendars[0]['items']:
-            e_duration = get_duration(e)
-            # check if event belongs to current period
-            if e[periods[0]['type']] == bound:
-                bar[index] += e_duration
-                sum_bar[index] += e_duration if index > 0 else e_duration
-
-    return {'bar'    : bar,
-            'sum_bar': sum_bar,
-           }
            
 def check_or_create_path(username):
     user_static_folder = 'graphs/'+username+'/'
@@ -102,33 +49,6 @@ class Handler():
         builds user, credential, service
         """
         self.user = User.objects.get(username=username)
-
-        # get creds from db, TODO: check should be separate function
-        # self.creds = CredentialsModel.objects.get(id__username=username).credentials
-        # if self.creds.access_token_expired:
-        #     # check time instead of expiration check
-        #     print("oops")
-
-        # # build service to get access to API
-        # self.http = self.creds.authorize(httplib2.Http())
-        # self.service = discovery.build('calendar', 'v3', http=self.http)
-
-        # # calendars in list of dictionaries
-        # current_calendars = self.service.calendarList().list().execute().get('items', [])   
-
-        # # if there are new calendars add them to db
-        # for c in current_calendars:
-        #     try:
-        #         Calendar.objects.filter(id=c['id'])
-        #     except Calendar.DoesNotExist:
-        #         new_cm = Calendar.objects.create(id=c['id'], 
-        #                                          user=user, 
-        #                                          name=c['summary'])                                      
-        #         new_cm.save()
-    
-          
-    def get_access_token(self):
-        return self.creds.get_access_token()
         
         
     def token_need_renovation(self):
@@ -171,11 +91,6 @@ class Handler():
                 
             elif period_type == 'last_30_days':
                 start -= timedelta(days=30)
-                # How to make it readable?
-                # obtaining last day of the month
-                # end   = datetime.combine(date(now.year, now.month, calendar_module.monthrange(now.year, now.month)[1]),
-                #                          datetime.min.time())
-                # delta = timedelta(days=1)
                 
                 
             bounds = []
@@ -199,51 +114,6 @@ class Handler():
             if p['type'] == period_type:
                 return (p['bounds'], p['delta'])
         return ()
-    
-
-    def fetch_events(self, calendars_ids, periods):
-        """
-        takes array of calendars ids and time interval
-        returns {'calendar_id': [events,...,]}
-        """
-        events = []
-        for c_id in calendars_ids:
-            for period in periods:
-                timeMax = period['end'].isoformat()+'Z'
-                timeMin = period['start'].isoformat()+'Z'
-                items   = self.service.events().list(calendarId=c_id,
-                                                     timeMax=timeMax,
-                                                     timeMin=timeMin
-                                                    ).execute().get('items', [])
-                for i in items:
-                    if i['status'] == 'cancelled':
-                        items.remove(i)
-                        continue
-                        
-                    # for all day events
-                    if not 'dateTime' in i['start'].keys():
-                        date_from_id = i['id'].split('_')[1]
-                        i['dateTime'] = date_from_id
-                        
-                    # for recurrent events
-                    if 'recurrence' in i.keys():
-                        pass
-                        
-                                                 
-                                                  
-                events.append({'calendarId' : c_id,
-                               'period_type': period['type'],
-                               'items'      : items,
-                              })
-
-        return events
-
-
-    def get_calendars_summary(self):
-        """
-        returns [(id, name), ...,] for each calendar in db for given user
-        """
-        return [(x.id, x.name) for x in Calendar.objects.all().filter(user__username=self.user.username)]
 
 
     def create_graphs(self, calendars, input_periods):
@@ -267,8 +137,9 @@ class Handler():
         # create folder to store images
         full_path, filename, image_path = check_or_create_path(self.user.username)
             
-        plt.bar([l for l, _ in enumerate(events_distribution)], 
+        plt.bar(bounds, 
                 height=events_distribution)
+        plt.xaxis_date()
         plt.grid(True)
         plt.savefig(full_path+filename)
         plt.clf()
