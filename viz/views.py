@@ -31,7 +31,7 @@ def viz(request):
         calendar = form.cleaned_data['calendar']
         if calendar == 'primary':
             calendar = request.user.email
-        cm.update_events(calendar)
+        # cm.update_events(calendar)
         h = handler.Handler(request.user.username)
         h.create_graphs([calendar], [form.cleaned_data['period']])
         images = h.create_graphs([calendar], 
