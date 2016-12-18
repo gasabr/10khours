@@ -26,8 +26,12 @@ def viz(request):
     cm.update_calendars(request.user.username)
     summaries = cm.get_calendars_summary()
     f = 'oops'
-    form = ChoiceForm(request.GET or None, calendars_list=summaries)
+    form = ChoiceForm(request.POST or None, calendars_list=summaries)
+    
     if form.is_valid():
+        if form.cleaned_data['refresh']:
+            cm.update_events(form.cleaned_data['calendar'])
+        
         calendar = form.cleaned_data['calendar']
         if calendar == 'primary':
             calendar = request.user.email

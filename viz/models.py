@@ -48,13 +48,6 @@ def clear_event(event):
             
     # for recurrent events (old API version)
     if 'recurrence' in event.keys():
-        # # parse start from recurrence rule
-        # try:
-        #     start = datetime.strptime(event['recurrence'][0][-15:], '%Y%m%dT%H%M%S')
-        # except ValueError:
-        #     return ()
-                
-        # return (start, start + (end_dt - start_dt))
         return ()
         
     # for recurrent events (new API version) 
@@ -99,7 +92,7 @@ class CalendarManager(models.Manager):
         # calendars_ids = [r.id for r in Calendar.objects.filter(user__username=self.user.username)]
         calendar = Calendar.objects.get(id=calendar_id)
         timeMax  = (datetime.now() + timedelta(days=31)).isoformat() + 'Z'
-        timeMin  = (datetime.now() - timedelta(days=7)).isoformat() + 'Z'
+        timeMin  = (datetime.now() - timedelta(days=31)).isoformat() + 'Z'
         items    = self.service.events().list(calendarId=calendar_id,
                                              timeMin=timeMin,
                                             ).execute().get('items', [])

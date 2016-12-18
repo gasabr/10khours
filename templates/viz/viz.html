@@ -1,8 +1,9 @@
 {{ expires_in }}
 {% load static %}
-<form method="GET" action="">
+<form method="POST" action="">
+  {% csrf_token %}
   {{ form }}
-  <input type=submit>
+  <input type=submit value="Visualize!">
 </form>
 
 {% for img_path in images %}

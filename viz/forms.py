@@ -18,6 +18,7 @@ class ChoiceForm(forms.Form):
     """
     period   = forms.ChoiceField(choices=PERIODS, required=True)
     keywords = forms.CharField(required=False)
+    refresh  = forms.BooleanField()
     
 
     def __init__(self, *args, **kwargs):
