@@ -57,8 +57,7 @@ def plot(y, path_to_save, plot_type, xticks):
     ind = range(1, len(xticks))    # the x locations for the groups
     plt.xticks(ind, xticks, rotation=50)
     plt.xlabel('periods')
-    plt.savefig(path_to_save)
-    plt.tight_layout()
+    plt.savefig(path_to_save, bbox_inches='tight')
     
 
 class Handler():
@@ -174,6 +173,12 @@ class Handler():
              path_to_save=path_to_save,
              plot_type='bar'
             )
+        
+        images = []
+        images.append({'title'  : 'This month progress by day',
+                       'path'   : static_path1,
+                       'summary': '',
+                       })
             
         path_to_save, static_path2 = check_path(self.user.username, 'bar-sum')
         plot(y=events_sum_dist,
@@ -181,5 +186,9 @@ class Handler():
              path_to_save=path_to_save,
              plot_type='bar-sum'
             )
-
-        return [static_path1, static_path2]
+        images.append({'title'  : 'This month progress summary',
+                       'path'   : static_path2,
+                       'summary': '',
+                       })
+        # return wtf
+        return images

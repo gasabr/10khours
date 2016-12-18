@@ -29,22 +29,21 @@ def viz(request):
     form = ChoiceForm(request.POST or None, calendars_list=summaries)
     
     if form.is_valid():
-        if form.cleaned_data['refresh']:
-            cm.update_events(form.cleaned_data['calendar'])
+        # if user asked for syncing events
+        if form.cleaned_data['sync']:
+            cm.sync_events(form.cleaned_data['calendar'])
         
         calendar = form.cleaned_data['calendar']
         if calendar == 'primary':
             calendar = request.user.email
-        # cm.update_events(calendar)
+        
         h = handler.Handler(request.user.username)
         h.create_graphs([calendar], [form.cleaned_data['period']])
         images = h.create_graphs([calendar], 
                                  [form.cleaned_data['period']])
-        # e = "your token expires in "+str(h.get_access_token().expires_in)+" sec."
                             
         return render(request, 'viz/viz.html', {'form'  : form, 
                                                 'images': images,
-                                                'expires_in': '1'}
-                     )
+                                               })
     
     return render(request, 'viz/viz.html', {'form'   : form, 'path' : f})

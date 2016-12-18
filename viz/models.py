@@ -83,7 +83,7 @@ class CalendarManager(models.Manager):
                 new_calendar.save()
                 
     
-    def update_events(self, calendar_id):
+    def sync_events(self, calendar_id):
         """
         takes array of calendars ids and time interval
         returns {'calendar_id': [events,...,]}
