@@ -36,11 +36,17 @@ def viz(request):
         calendar = form.cleaned_data['calendar']
         if calendar == 'primary':
             calendar = request.user.email
-        
+
+        keywords_ = []
+        if form.cleaned_data['keywords']:
+            keywords_ = form.cleaned_data['keywords'].split(',')
+            # return hm
+
         h = handler.Handler(request.user.username)
-        h.create_graphs([calendar], [form.cleaned_data['period']])
         images = h.create_graphs([calendar], 
-                                 [form.cleaned_data['period']])
+                                 [form.cleaned_data['period']],
+                                 keywords_,                                 
+                                )
                             
         return render(request, 'viz/viz.html', {'form'  : form, 
                                                 'images': images,

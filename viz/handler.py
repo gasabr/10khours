@@ -8,10 +8,12 @@ import matplotlib.dates as mdates
 from datetime import datetime, timedelta, date
 import calendar as calendar_module
 from django.conf import settings
+from django.db.models import Q
 from apiclient import discovery
 from .models import Calendar, Event
 from gauth.models import CredentialsModel
 from django.contrib.auth.models import User
+from functools import reduce
 
 PERIODS = ['this_month', 'this_30_days','this_week', 'today']
 # <any/few>_<PERIOD>
@@ -137,7 +139,7 @@ class Handler():
         return P
 
 
-    def create_graphs(self, calendars, input_periods):
+    def create_graphs(self, calendars, input_periods, keywords):
         """
         takes what to show on graphs in 2 lists
         plots it with matplolib
@@ -151,10 +153,20 @@ class Handler():
         periods = self.create_periods(input_periods)
         bounds = periods[0]['bounds']
         events = []
+        # q = reduce(lambda x, y: x | y, [Q(summary__icontains=k) for k in keywords])
         for index, b in enumerate(bounds[:-1]):
-            events.append(Event.objects.filter(start__range=[str(b), str(bounds[bounds.index(b)+1])],
-                                               calendar__id=calendars[0]
-                                              ))
+            if keywords:
+                events.append(Event.objects.filter(
+                        reduce(lambda x, y: x | y, [Q(summary__contains=k) for k in keywords]),
+                        start__range=[str(b), str(bounds[bounds.index(b)+1])],
+                        calendar__id=calendars[0],
+                    ))
+            else:
+                events.append(Event.objects.filter(
+                        start__range=[str(b), str(bounds[bounds.index(b)+1])],
+                        calendar__id=calendars[0],
+                    ))
+        # return haha
         # spread events in bounds
         events_distribution = [0]*(len(bounds)-1)
         for i, qs in enumerate(events):
