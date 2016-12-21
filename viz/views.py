@@ -25,7 +25,6 @@ def viz(request):
     cm = CalendarManager()
     cm.update_calendars(request.user.username)
     summaries = cm.get_calendars_summary()
-    f = 'oops'
     form = ChoiceForm(request.POST or None, calendars_list=summaries)
     
     if form.is_valid():
@@ -52,4 +51,4 @@ def viz(request):
                                                 'images': images,
                                                })
     
-    return render(request, 'viz/viz.html', {'form'   : form, 'path' : f})
+    return render(request, 'viz/viz.html', {'form': form})

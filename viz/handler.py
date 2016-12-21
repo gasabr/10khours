@@ -20,7 +20,7 @@ PERIODS = ['this_month', 'this_30_days','this_week', 'today']
 # <any> - one calendar
 # <few> - some calendars
 PERIOD_TO_TYPES = {'this_month'    : ['bar', 'sum-bar'],
-                   'last_30_days'  : ['bar', 'sum-bar'],
+                   'this_week'     : ['bar', 'sum-bar'],
                    'any_this_week' : ['bar', 'multi_bar'],
                    'any_day'       : ['pie', 'timeline'],  
                   }
@@ -44,9 +44,10 @@ def plot(y, path_to_save, plot_type, xticks):
 	will plot and save the image in specified folder
     """
     plt.figure(figsize=(10,5))
+    
     if plot_type=='bar-sum':
-        plt.plot(y)
-        plt.fill_between(range(len(y)), y, color='#eeefff')
+        plt.plot(range(1, len(y)+1), y)
+        plt.fill_between(range(1, len(y)+1), y, color='#eeefff')
         
     elif plot_type == 'bar':
         plt.bar(left=range(1, len(y)+1), 
@@ -56,7 +57,7 @@ def plot(y, path_to_save, plot_type, xticks):
                )
         
     plt.ylabel('Hours')
-    ind = range(1, len(xticks))    # the x locations for the groups
+    ind = range(1, len(xticks)+1)    # the x locations for the groups
     plt.xticks(ind, xticks, rotation=50)
     plt.xlabel('periods')
     plt.savefig(path_to_save, bbox_inches='tight')
@@ -129,6 +130,7 @@ class Handler():
                 bounds.append(tmp)
                 tmp += delta
             bounds.append(end)
+            bounds.append(end + timedelta(days=1))
                 
             P.append({'type'  : period_type,
                       'start' : start,
@@ -151,9 +153,9 @@ class Handler():
         # prepare data
         # get the dict periods with special function
         periods = self.create_periods(input_periods)
-        bounds = periods[0]['bounds']
-        events = []
-        # q = reduce(lambda x, y: x | y, [Q(summary__icontains=k) for k in keywords])
+        bounds  = periods[0]['bounds']
+        events  = []
+        
         for index, b in enumerate(bounds[:-1]):
             if keywords:
                 events.append(Event.objects.filter(
@@ -166,7 +168,7 @@ class Handler():
                         start__range=[str(b), str(bounds[bounds.index(b)+1])],
                         calendar__id=calendars[0],
                     ))
-        # return haha
+        
         # spread events in bounds
         events_distribution = [0]*(len(bounds)-1)
         for i, qs in enumerate(events):
