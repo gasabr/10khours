@@ -20,17 +20,17 @@ PERIODS = ['this_month', 'this_30_days','this_week', 'today']
 # <any> - one calendar
 # <few> - some calendars
 PERIOD_TO_TYPES = {'this_month'    : ['bar', 'sum-bar'],
+                   'last_30_days'  : ['bar', 'sum-bar'],
                    'this_week'     : ['bar', 'sum-bar'],
-                   'any_this_week' : ['bar', 'multi_bar'],
                    'any_day'       : ['pie', 'timeline'],  
                   }
            
-def check_path(username, filename):
+def check_path(username, period_type, filename):
     user_static_folder = 'graphs/'+username+'/'
     full_path  = os.path.join(settings.STATIC_ROOT, user_static_folder)
     if not os.path.exists(full_path):
         os.makedirs(full_path)
-    filename = filename + '.png'
+    filename = period_type + '_' + filename + '.png'
         
     if os.path.exists(full_path+filename):
         os.remove(full_path+filename)
@@ -44,17 +44,24 @@ def plot(y, path_to_save, plot_type, xticks):
 	will plot and save the image in specified folder
     """
     plt.figure(figsize=(10,5))
+    xaxis = range(1, len(y)+1) if plot_type == 'this_week' else range(len(y))
     
     if plot_type=='bar-sum':
         plt.plot(range(1, len(y)+1), y)
         plt.fill_between(range(1, len(y)+1), y, color='#eeefff')
+        plt.xlim([1, len(y)])
         
     elif plot_type == 'bar':
+        # left=range(1, len(y)+1)
         plt.bar(left=range(1, len(y)+1), 
                 height=y, 
                 width=0.6, 
                 align="center"
                )
+        # plt.xlim([1, len(y)+1])
+        plt.axis('tight')
+        x1,x2,y1,y2 = plt.axis()
+        plt.axis((x1, x2, 0, max(y)+2))
         
     plt.ylabel('Hours')
     ind = range(1, len(xticks)+1)    # the x locations for the groups
@@ -62,7 +69,7 @@ def plot(y, path_to_save, plot_type, xticks):
     plt.xlabel('periods')
     plt.savefig(path_to_save, bbox_inches='tight')
     
-
+    
 class Handler():
     """
     Class to handle all operations on viz view (@viz/views.py) such that:
@@ -100,10 +107,12 @@ class Handler():
                 # How to make it readable?
                 # obtaining last day of the month
                 last_day_of_month = calendar_module.monthrange(now.year, now.month)[1]
-                end   = datetime.combine(date(now.year, 
-                                              now.month, 
-                                              last_day_of_month),
-                                         datetime.max.time())
+                # next_month = now.month+1 if now.month < 12 else 1
+                end = start + timedelta(days=last_day_of_month)
+                # end   = datetime.combine(date(now.year, 
+                #                               next_month, 
+                #                               1),
+                #                          datetime.min.time())
                 delta = timedelta(days=1)
     
             elif period_type == 'today':
@@ -115,13 +124,12 @@ class Handler():
                 start = datetime.combine(date(now.year, now.month, now.day) - timedelta(days=now.weekday()),
                                          datetime.min.time())
                 # obtaining last day of the week
-                end   = start + timedelta(days=6)
-                delta = timedelta(days=1)
+                end   = start + timedelta(days=7)
                 
             elif period_type == 'last_30_days':
                 start = datetime.combine((now - timedelta(days=30)).date(),
                                           datetime.min.time())
-                end   = datetime.combine(now.date(), datetime.max.time())
+                end   = datetime.combine(now.date(), datetime.min.time())
                 
                 
             bounds = []
@@ -130,7 +138,7 @@ class Handler():
                 bounds.append(tmp)
                 tmp += delta
             bounds.append(end)
-            bounds.append(end + timedelta(days=1))
+            # bounds.append(end + timedelta(days=1))
                 
             P.append({'type'  : period_type,
                       'start' : start,
@@ -181,7 +189,10 @@ class Handler():
         
         days = [x.day for x in bounds[:-1]]
         
-        path_to_save, static_path1 = check_path(self.user.username, 'bar')
+        path_to_save, static_path1 = check_path(self.user.username, 
+                                                input_periods[0], 
+                                                'bar'
+                                               )
         plot(y=events_distribution,
              xticks=days,
              path_to_save=path_to_save,
@@ -194,7 +205,10 @@ class Handler():
                        'summary': '',
                        })
             
-        path_to_save, static_path2 = check_path(self.user.username, 'bar-sum')
+        path_to_save, static_path2 = check_path(self.user.username, 
+                                                input_periods[0], 
+                                                'bar-sum'
+                                               )
         plot(y=events_sum_dist,
              xticks=days,
              path_to_save=path_to_save,
@@ -204,5 +218,5 @@ class Handler():
                        'path'   : static_path2,
                        'summary': '',
                        })
-        # return wtf
+        
         return images
