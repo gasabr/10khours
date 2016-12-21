@@ -43,10 +43,10 @@ def plot(y, path_to_save, plot_type, xticks):
     """
 	will plot and save the image in specified folder
     """
-    plt.figure(figsize=(10,5))
+    plt.figure(figsize=(8,4))
     xaxis = range(1, len(y)+1) if plot_type == 'this_week' else range(len(y))
     
-    if plot_type=='bar-sum':
+    if plot_type=='sum-bar':
         plt.plot(range(1, len(y)+1), y)
         plt.fill_between(range(1, len(y)+1), y, color='#eeefff')
         plt.xlim([1, len(y)])
@@ -69,7 +69,26 @@ def plot(y, path_to_save, plot_type, xticks):
     plt.xlabel('periods')
     plt.savefig(path_to_save, bbox_inches='tight')
     
-    
+   
+def get_title(period, plotting_type):
+    """
+    :returns:
+        title : string to be shown above the picture on the view
+    """
+    if period['type'] == 'this_month':
+        month_name = datetime.now().strftime('%B')
+        if plotting_type == 'bar': return month_name + ' progress by day'
+        if plotting_type == 'sum-bar': return 'Your progress in ' + month_name
+        
+    else:
+        start = period['start'].strftime('%d %b')
+        end   = period['end'].strftime('%d %b')
+        if plotting_type == 'bar': 
+            return start + ' - ' + end + ' progress by day'
+        if plotting_type == 'sum-bar': 
+            return 'Your progress from ' + start + ' to ' + end
+   
+  
 class Handler():
     """
     Class to handle all operations on viz view (@viz/views.py) such that:
@@ -138,7 +157,6 @@ class Handler():
                 bounds.append(tmp)
                 tmp += delta
             bounds.append(end)
-            # bounds.append(end + timedelta(days=1))
                 
             P.append({'type'  : period_type,
                       'start' : start,
@@ -155,15 +173,13 @@ class Handler():
         plots it with matplolib
         saves images in /static/<username> 
         """
-        # get types of pictures to produce from dict above
-        plotting_types = PERIOD_TO_TYPES[input_periods[0]]
-
         # prepare data
         # get the dict periods with special function
-        periods = self.create_periods(input_periods)
-        bounds  = periods[0]['bounds']
+        period  = self.create_periods(input_periods)[0]
+        bounds  = period['bounds']
         events  = []
         
+        # spread events in bounds
         for index, b in enumerate(bounds[:-1]):
             if keywords:
                 events.append(Event.objects.filter(
@@ -177,46 +193,41 @@ class Handler():
                         calendar__id=calendars[0],
                     ))
         
-        # spread events in bounds
-        events_distribution = [0]*(len(bounds)-1)
+        data = {}
+        
+        # get data for bar graph
+        data['bar'] = [0]*(len(bounds)-1)
         for i, qs in enumerate(events):
             for ev in qs.values():
-                events_distribution[i] += ev['duration']
+                data['bar'][i] += ev['duration']
         
-        events_sum_dist = list(events_distribution[:])
-        for i in range(1, len(events_distribution)):
-            events_sum_dist[i] += events_sum_dist[i-1]
+        # get data for summary graph
+        data['sum-bar'] = data['bar'][:]
+        for i in range(1, len(data['bar'])):
+            data['sum-bar'][i] += data['sum-bar'][i-1]
         
+        # xaxis data
         days = [x.day for x in bounds[:-1]]
-        
-        path_to_save, static_path1 = check_path(self.user.username, 
-                                                input_periods[0], 
-                                                'bar'
-                                               )
-        plot(y=events_distribution,
-             xticks=days,
-             path_to_save=path_to_save,
-             plot_type='bar'
-            )
-        
+        # array of static files paths
         images = []
-        images.append({'title'  : 'This month progress by day',
-                       'path'   : static_path1,
-                       'summary': '',
-                       })
-            
-        path_to_save, static_path2 = check_path(self.user.username, 
-                                                input_periods[0], 
-                                                'bar-sum'
-                                               )
-        plot(y=events_sum_dist,
-             xticks=days,
-             path_to_save=path_to_save,
-             plot_type='bar-sum'
-            )
-        images.append({'title'  : 'This month progress summary',
-                       'path'   : static_path2,
-                       'summary': '',
-                       })
         
+        # get types of pictures to produce from dict above
+        plotting_types = PERIOD_TO_TYPES[input_periods[0]]
+
+        for t in plotting_types:
+            path_to_save, static_path = check_path(self.user.username, 
+                                                   input_periods[0], 
+                                                   t
+                                                  )
+            plot(y=data[t],
+                 xticks=days,
+                 path_to_save=path_to_save,
+                 plot_type=t
+                )
+            title = get_title(period, t)
+            images.append({'title'  : title,
+                           'path'   : static_path,
+                           'summary': '',
+                         })
+
         return images
