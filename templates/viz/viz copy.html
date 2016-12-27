@@ -1,0 +1,26 @@
+{% extends "gauth/base.html" %}
+{% load static %}
+
+{% block main %}
+    <div class='form-inline'>
+        <form method="POST" action="">
+        {% csrf_token %}
+        {% for field in form %}
+            <div class="form-group">
+                {{ field.errors }}
+                {{ field.label_tag }} {{ field }}
+            </div>
+        {% endfor %}
+        <input type=submit value="Visualize!">
+        </form>
+    </div>
+    
+
+    {% for image_dict in images %}
+        <p>{{ image_dict.title }}</p>
+        <img src="{{ image_dict.path }}">
+        <br>
+    {% endfor %}
+{% endblock main %}
+
+

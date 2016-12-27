@@ -14,8 +14,8 @@ from oauth2client.client import HttpAccessTokenRefreshError
 
 
 def login_view(request):
-	print(request.user.is_authenticated())
-	title = 'Login and check credentials'
+	title  = 'Log in'
+	button = 'log in'
 	form = UserLoginForm(request.POST or None)
 	if form.is_valid():
 		email    = form.cleaned_data.get('email')
@@ -41,22 +41,26 @@ def login_view(request):
 				return redirect('get_creds')
 		else:
 		    redirect('viz')
-
-	return render(request, "accounts/form.html", {"form": form, "title": title})
+	return render(request, "accounts/form.html", {"form"  : form, 
+	                                              "title" : title,
+	                                              "button": button,
+	                                              })
 
 
 @login_required
 def logout_view(request):
 	logout(request)
-	return redirect('login')
+	return redirect('home')
 
 
 def register_view(request):
-	title = "Registration"
+	title  = "Registration"
+	button = 'sign up'
 	form = UserRegistraterForm(request.POST or None)
 	context = {
 		'title' : title,
-		'form' : form
+		'form'  : form,
+		'button': button,
 	}
 
 	if form.is_valid():

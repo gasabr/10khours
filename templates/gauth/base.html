@@ -1,28 +1,95 @@
-<!DOCTYPE html>
+<!DOCTYPE HTML>
 <html lang="en">
  <head>
    <meta charset="utf-8">
    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-   <meta name="viewport" content="width=device-width, initial-scale=1">
-   <title>{% block title %}Authentication Tutorial{% endblock %}</title>
-
+   <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+   <title>{% block title %}Authentication Tutorial{% endblock title %}</title>
+ 
    <!-- Bootstrap -->
-   <link href="/static/css/bootstrap.min.css" rel="stylesheet">
-   <link href="/static/css/bootstrap-theme.min.css" rel="stylesheet">
-   <link href="/static/css/fbposter.css" rel="stylesheet">
-
-   <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
-   <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
-   <!--[if lt IE 9]>
-     <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
-     <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
-   <![endif]-->
- </head>
- <body>
-   {% block main %}{% endblock %}
+   <link href="/static/css/bootstrap.min.css" rel="stylesheet" />
+   <!-- <link href="/static/css/bootstrap-theme.min.css" rel="stylesheet" /> -->
+   <!-- <link href="/static/css/fbposter.css" rel="stylesheet" /> -->
+   <link href="/static/css/main.css" rel="stylesheet"  />
+   <link href="/static/css/font-awesome.min.css" rel="stylesheet" />
+   <!-- i'd like not to use this -->
+   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+   
    <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
    <!-- Include all compiled plugins (below), or include individual files as needed -->
-   <script src="/static/js/bootstrap.min.js"></script>
+   <script src="static/js/bootstrap.min.js"></script>
+ 
+<!--    HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries
+WARNING: Respond.js doesn't work if you view the page via file://
+[if lt IE 9]>
+  <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+  <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+<![endif] -->
+ 
+ </head>
+
+ <body>
+    {% block header %}
+    
+	<header id="header">
+		<div class="inner">
+			<a href="{% url 'home' %}" class="logo">10kHours</a>
+			<nav id="nav">
+				<a href="{% url 'home' %}">Home</a>
+				<a href="{% url 'viz' %}">Visualisation</a>
+			</nav>
+		</div>
+		<a href="#menu" class="navPanelToggle"><span class="fa fa-bars"></span></a> 
+	</header>
+    {% endblock header %}
+    
+    <div class="wrapper">
+    {% block main %}{% endblock main %}
+        <div class="push"></div>
+    </div>
+   
+    {% block footer %}
+    
+    <!-- Footer -->
+    <div class="footer navbar-static-bottom">
+	    <section id="footer">
+		    <div class="inner">
+    		    <div class="copyright">
+				    &copy; Untitled Design: <a href="https://templated.co/">TEMPLATED</a>. Images <a href="https://unsplash.com/">Unsplash</a>
+				    <p>Contacts:
+				        <a href="https://twitter.com/gasabr"><i class="fa fa-2x fa-fw fa-twitter" alt="twitter"></i></a>
+				        <a href="https://github.com/gasabr"><i class="fa fa-2x fa-fw fa-github" alt="github"></i></a>
+				        <a href="https://telegram.me/gasabr"><i class="fa fa-2x fa-fw fa-telegram" alt="telegram"></i></a>
+				    </p>
+			    </div>
+		    </div>
+	    </section>
+	</div>
+	
+    {% endblock footer %}
+    
+    {% block scripts %}
+    <script>
+      $(document).ready(function() {
+    
+       var docHeight = $(window).height();
+       var footerHeight = $('#footer').height();
+       var footerTop = $('#footer').position().top + footerHeight;
+       
+       if (footerTop < docHeight) {
+        $('#footer').css('margin-top', 0 + (docHeight - footerTop) + 'px');
+       }
+      });
+    </script>
+    
+    <!-- Scripts -->
+	<script src="/static/js/jquery.min.js"></script>
+    <script src="/static/js/skel.min.js"></script>
+	<script src="/static/js/util.js"></script>
+	<script src="/static/js/main.js"></script>
+	{% endblock scripts %}
+    
  </body>
 </html>
+

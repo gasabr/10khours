@@ -15,14 +15,13 @@ from gauth.models import CredentialsModel
 from django.contrib.auth.models import User
 from functools import reduce
 
-PERIODS = ['this_month', 'this_30_days','this_week', 'today']
+PERIODS = ['this_month', 'this_30_days','this_week']
 # <any/few>_<PERIOD>
 # <any> - one calendar
 # <few> - some calendars
 PERIOD_TO_TYPES = {'this_month'    : ['bar', 'sum-bar'],
                    'last_30_days'  : ['bar', 'sum-bar'],
                    'this_week'     : ['bar', 'sum-bar'],
-                   'any_day'       : ['pie', 'timeline'],  
                   }
            
 def check_path(username, period_type, filename):
@@ -50,6 +49,8 @@ def plot(y, path_to_save, plot_type, xticks):
         plt.plot(range(1, len(y)+1), y)
         plt.fill_between(range(1, len(y)+1), y, color='#eeefff')
         plt.xlim([1, len(y)])
+        x1,x2,y1,y2 = plt.axis()
+        plt.axis((x1, x2, 0, max(y)+2))
         
     elif plot_type == 'bar':
         # left=range(1, len(y)+1)
@@ -66,7 +67,7 @@ def plot(y, path_to_save, plot_type, xticks):
     plt.ylabel('Hours')
     ind = range(1, len(xticks)+1)    # the x locations for the groups
     plt.xticks(ind, xticks, rotation=50)
-    plt.xlabel('periods')
+    plt.xlabel('days')
     plt.savefig(path_to_save, bbox_inches='tight')
     
    
@@ -126,12 +127,7 @@ class Handler():
                 # How to make it readable?
                 # obtaining last day of the month
                 last_day_of_month = calendar_module.monthrange(now.year, now.month)[1]
-                # next_month = now.month+1 if now.month < 12 else 1
                 end = start + timedelta(days=last_day_of_month)
-                # end   = datetime.combine(date(now.year, 
-                #                               next_month, 
-                #                               1),
-                #                          datetime.min.time())
                 delta = timedelta(days=1)
     
             elif period_type == 'today':
@@ -207,7 +203,10 @@ class Handler():
             data['sum-bar'][i] += data['sum-bar'][i-1]
         
         # xaxis data
-        days = [x.day for x in bounds[:-1]]
+        if period['type'] != 'this_week':
+            days = [x.day for x in bounds[:-1]]
+        else:
+            days = [x.strftime('%a') for x in bounds[:-1]]
         # array of static files paths
         images = []
         

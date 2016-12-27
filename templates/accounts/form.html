@@ -1,18 +1,49 @@
-<!DOCTYPE html>
+{% extends "gauth/base.html" %}
 
-{% block content %}
+{% block title %}{{ title }}{% endblock title %}
+
+{% block main %}
 {% load static %}
-<img src="/static/admin/img/search.svg"/>
 
-<div class="some">
-<h1>{{ title }}</h1>
-<hr/>
 
-<form method="POST" action="{{ get_creds }}">
-{% csrf_token %}
-{{ form.as_ul }}
-<input type="submit" name="" value="{{ title }}">
 
-</form>
+<div class="container">
+    <div class="row">
+        <div class="col-md-6 col-md-offset-3 text-center">
+            <div class="col-sm-2"></div>
+            <div class="col-sm-10">
+                <h2 align='center'>{{ title }}</h2>
+            </div>
+        </div>
+    </div>
+<div class="row">
+  <div class="col-md-6 col-md-offset-3 text-center">
+    <form class="form-horizontal" role="form" method="POST" action="">
+    {% csrf_token %}
+      <div class="form-group">
+        <div class="col-sm-2">
+          <label for="id_email" class="control-label">Gmail</label>
+        </div>
+        <div class="col-sm-10">
+          <input type="email" name="email" class="form-control" id="id_email" placeholder="your Gmail address" required>
+        </div>
+      </div>
+      <div class="form-group">
+        <div class="col-sm-2">
+          <label for="id_password" class="control-label">Password</label>
+        </div>
+        <div class="col-sm-10">
+          <input type="password" name="password" class="form-control" id="id_password" placeholder="Password" required>
+        </div>
+      </div>
+      <div class="form-group">
+        <div class="col-sm-offset-2 col-sm-10">
+          <button type="submit">{{ button }}</button>
+        </div>
+      </div>
+    </form>
+  </div>
 </div>
-{% endblock content %}
+</div>
+{% endblock main %}
+{% block footer %}{% endblock footer %}

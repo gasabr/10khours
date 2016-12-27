@@ -1,28 +1,67 @@
-{% extends 'gauth/base.html' %}
+<!DOCTYPE HTML>
+<!--
+	Introspect by TEMPLATED
+	templated.co @templatedco
+	Released for free under the Creative Commons Attribution 3.0 license (templated.co/license)
+-->
+{% extends "gauth/base.html" %}
+{% block title %}10 Thousand Hours{% endblock title %}
+{% load static %}
 
 {% block main %}
- <div>
- <h1>authentication demo</h1>
- <a href="{% url 'register' %}">Registration</a>
+		<!-- Banner -->
+			<section id="banner">
+				<div class="inner">
+					<h1>10kHours: <span>Visualisation of your way to goals<br />
+					using Google Calendar</span></h1>
+					<ul class="actions">
+						<li><a href="{% url 'register' %}" class="button alt">Registration</a></li>
+						<li><a href="{% url 'login' %}" class="button alt">Log in</a></li>
+					</ul>
+				</div>
+			</section>
 
- <p>
-   <ul>
-   {% if user and not user.is_anonymous %}
-     <li>
-       <a>Hello {{ user.get_full_name|default:user.username }}!</a>
-     </li>
-     <li>
-       <a href="{% url 'viz' %}?next={{ request.path }}">Get Visualisation</a>
-     </li>
-     <li>
-       <a href="{% url 'logout' %}?next={{ request.path }}">Logout</a>
-     </li>
-   {% else %}
-     <li>
-       <a href="{% url 'register' %}?next=/oauth2redirect">Login with Google</a>     
-     </li>
-   {% endif %}
-   </ul>
- </p>
- </div>
-{% endblock %}
+		<!-- One -->
+			<section id="one">
+				<div class="inner">
+					<header>
+						<h2>About</h2>
+					</header>
+					<p>This site was made to visualise your Google Calendar data. I think, it’s interesting to see your progress in a matter of hours spent, so this site can help you with such task.</p>
+					<ul class="actions">
+						<li><a href="#" class="button alt">Learn More</a></li>
+					</ul>
+				</div>
+			</section>
+
+		<!-- Two -->
+			<section id="two">
+				<div class="inner">
+					<article>
+						<div class="content">
+							<header>
+								<h3>Pellentesque adipis</h3>
+							</header>
+							<div class="image fit">
+								<img src="images/pic01.jpg" alt="" />
+							</div>
+							<p>Cumsan mollis eros. Pellentesque a diam sit amet mi magna ullamcorper vehicula. Integer adipiscin sem. Nullam quis massa sit amet lorem ipsum feugiat tempus.</p>
+						</div>
+					</article>
+					<article class="alt">
+						<div class="content">
+							<header>
+								<h3>Morbi interdum mol</h3>
+							</header>
+							<div class="image fit">
+								<img src="images/pic02.jpg" alt="" />
+							</div>
+							<p>Cumsan mollis eros. Pellentesque a diam sit amet mi magna ullamcorper vehicula. Integer adipiscin sem. Nullam quis massa sit amet lorem ipsum feugiat tempus.</p>
+						</div>
+					</article>
+				</div>
+			</section>
+{% endblock main %}
+
+
+
