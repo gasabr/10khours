@@ -6,28 +6,35 @@
 {% csrf_token %}
     <fieldset>
         <legend>{{ title }}</legend>
-        {% for field in form %}
-            {% if field.errors %}
-                <div class="control-group error">
-                    <label class="control-label">{{ field.label }}</label> 
-                    <div class="controls">{{ field }}
-                        <span class="help-inline">
-                            {% for error in  field.errors %}{{ error }}{% endfor %}
-                        </span>
-                    </div>
-                </div>
-            {% else %}
-                <div class="form-group">
-                    <label class="form-label">{{ field.label }}</label> 
-                    <div class="controls">{{ field }}
-                        {% if field.help_text %}
-                            <p class="help-inline"><small>{{ field.help_text }}</small></p>
-                        {% endif %}
-                    </div>
-                </div>
-            {% endif %}
-        {% endfor %}
-    <input type=submit value="Visualize!">
+                <legend>{{ title }}</legend>
+        <div class="form-group">
+            <label for="id_period" class="form-label">Period</label>
+            <select id="id_period" name="period" required>
+                <option value="this_month">this month</option>
+                <option value="last_30_days">last 30 days</option>
+                <option value="this_week">this week</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="id_calendar" class="form-label">Calendar</label>
+            {{ form.calendar }}
+        </div>
+        <div class="form-group">
+            <label for="id_sync" class="form-label">Sync</label>
+            <select id="id_sync" name="period" required>
+                <option value="this_month">nah, thanks</option>
+                <option value="last_30_days">yeah, for sure</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="id_keywords" class="form-label">Keywords</label>
+            <input id="id_keywords" type="text">
+        </div>
+        <div class="form-group">
+            <label for="id_visualize" class="form-label"><br></label>
+            <input type=submit value="Visualize!">       
+        </div>
+    
     <!-- <div class="form-actions">
         
     </div> -->
