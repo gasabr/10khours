@@ -69,7 +69,6 @@ def oauth2redirect(request):
                                    request.GET.get('state').encode('utf8'),
                                    request.user.id):
         return HttpResponseBadRequest()
-    print("user ID = ", request.user.id)
 
     code = request.GET.get('code')
     error = request.GET.get('error')

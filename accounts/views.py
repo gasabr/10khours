@@ -4,19 +4,22 @@ from django.contrib.auth import (
 	get_user_model,
 	authenticate
 )
+from django.db import IntegrityError
 import httplib2
 from django.shortcuts import render, redirect
 from django.http import HttpResponse
 from django.contrib.auth.decorators import login_required
 from gauth.models import CredentialsModel
-from .forms import UserLoginForm, UserRegistraterForm
+from .forms import UserLoginForm, UserRegistrationForm
 from oauth2client.client import HttpAccessTokenRefreshError
+from django import forms
 
 
 def login_view(request):
 	title  = 'Log in'
 	button = 'log in'
 	form = UserLoginForm(request.POST or None)
+
 	if form.is_valid():
 		email    = form.cleaned_data.get('email')
 		password = form.cleaned_data.get('password')
@@ -54,24 +57,24 @@ def logout_view(request):
 
 
 def register_view(request):
-	title  = "Registration"
-	button = 'sign up'
-	form = UserRegistraterForm(request.POST or None)
+	form = UserRegistrationForm(request.POST or None)
+
 	context = {
-		'title' : title,
+		'title' : "Registration",
 		'form'  : form,
-		'button': button,
+		'button': "sign up",
 	}
 
 	if form.is_valid():
-		print("form is valid")
 		user = form.save(commit=False)
+		email = form.cleaned_data.get('email')
 		username_from_email = form.cleaned_data.get('email').split('@')[0]
 		password = form.cleaned_data.get('password')
-		
+
 		user.username = username_from_email
+		user.email = form.cleaned_data.get('email')
 		user.set_password(password)
 		user.save()
 		return redirect('get_creds') # to the 1st step of OAuth2
-
-	return render(request, "accounts/form.html", context)
+	else:
+		return render(request, "accounts/form.html", context)

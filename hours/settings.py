@@ -37,12 +37,14 @@ GOOGLE_OAUTH2_CLIENT_SECRET = yamjam(os.path.join(ROOT_DIR, '.yamjam/config.yaml
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-LOCAL = False
+LOCAL = True
 
 if LOCAL:
     GOOGLE_REDIRECT = 'http://127.0.0.1:8000/oauth2/redirect/'
+    STATIC_URL ='static/'
 else:
     GOOGLE_REDIRECT = 'http://10khours.ru/oauth2/redirect/'
+    STATIC_URL ='/static/'
     
 ALLOWED_HOSTS = ['10khours.ru']
 
@@ -147,5 +149,4 @@ STATICFILES_DIRS = [
     os.path.join(BASE_DIR, "static"),
 ]
 
-STATIC_URL ='/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'static')
