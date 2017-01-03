@@ -1,10 +1,10 @@
 from django import forms
 
-PERIODS = (
+PERIODS = [
     ('this_month', 'this month'),
     ('last_30_days', 'last 30 days'),
     ('this_week', 'this week'),
-)
+]
 
 
 class ChoiceForm(forms.Form):
@@ -21,7 +21,7 @@ class ChoiceForm(forms.Form):
     
 
     def __init__(self, *args, **kwargs):
-        calendars_list = kwargs.pop('calendars_list')+[('primary', 'primary')]
+        calendars_list = kwargs.pop('calendars_list')
         super(ChoiceForm, self).__init__(*args, **kwargs)
 
         self.fields['calendar'] = forms.ChoiceField(choices=calendars_list)

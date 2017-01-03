@@ -18,10 +18,8 @@ from . import handler
 def viz(request):
     """
     view with visualization of the data
+    on creation will check current list of calendars and refresh it if needed
     """
-    # on creation will check current list of calendars and refresh it if needed
-    # h = handler.Handler(request.user.username)
-    # get tuples (calendar_id, title_of_calendar)
     cm = CalendarManager()
     cm.update_calendars(request.user.username)
     summaries = cm.get_calendars_summary()
@@ -38,14 +36,14 @@ def viz(request):
 
         keywords_ = []
         if form.cleaned_data['keywords']:
-            keywords_ = form.cleaned_data['keywords'].split(',')
-            # return hm
+            keywords_.append(form.cleaned_data['keywords'].split(','))
 
         h = handler.Handler(request.user.username)
         images = h.create_graphs([calendar], 
                                  [form.cleaned_data['period']],
                                  keywords_,                                 
                                 )
+        S = form.cleaned_data['period']
                             
         return render(request, 'viz/viz.html', {'form'  : form, 
                                                 'images': images,

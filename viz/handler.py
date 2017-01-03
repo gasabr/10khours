@@ -16,9 +16,6 @@ from django.contrib.auth.models import User
 from functools import reduce
 
 PERIODS = ['this_month', 'this_30_days','this_week']
-# <any/few>_<PERIOD>
-# <any> - one calendar
-# <few> - some calendars
 PERIOD_TO_TYPES = {'this_month'    : ['bar', 'sum-bar'],
                    'last_30_days'  : ['bar', 'sum-bar'],
                    'this_week'     : ['bar', 'sum-bar'],
@@ -53,21 +50,21 @@ def plot(y, path_to_save, plot_type, xticks):
         plt.axis((x1, x2, 0, max(y)+2))
         
     elif plot_type == 'bar':
-        # left=range(1, len(y)+1)
         plt.bar(left=range(1, len(y)+1), 
                 height=y, 
                 width=0.6, 
                 align="center"
                )
-        # plt.xlim([1, len(y)+1])
         plt.axis('tight')
         x1,x2,y1,y2 = plt.axis()
         plt.axis((x1, x2, 0, max(y)+2))
         
-    plt.ylabel('Hours')
     ind = range(1, len(xticks)+1)    # the x locations for the groups
     plt.xticks(ind, xticks, rotation=50)
+
+    plt.ylabel('Hours')
     plt.xlabel('days')
+
     plt.savefig(path_to_save, bbox_inches='tight')
     
    
@@ -140,6 +137,7 @@ class Handler():
                                          datetime.min.time())
                 # obtaining last day of the week
                 end   = start + timedelta(days=7)
+                x = oops
                 
             elif period_type == 'last_30_days':
                 start = datetime.combine((now - timedelta(days=30)).date(),
@@ -207,13 +205,12 @@ class Handler():
             days = [x.day for x in bounds[:-1]]
         else:
             days = [x.strftime('%a') for x in bounds[:-1]]
+
         # array of static files paths
         images = []
         
-        # get types of pictures to produce from dict above
-        plotting_types = PERIOD_TO_TYPES[input_periods[0]]
-
-        for t in plotting_types:
+        # get types of pictures to plot from dict above
+        for t in PERIOD_TO_TYPES[input_periods[0]]:
             path_to_save, static_path = check_path(self.user.username, 
                                                    input_periods[0], 
                                                    t
@@ -228,5 +225,4 @@ class Handler():
                            'path'   : static_path,
                            'summary': '',
                          })
-
         return images
