@@ -1,7 +1,6 @@
 import httplib2
 from django.db import models
 from django.contrib.auth.models import User
-from django.contrib import admin
 from datetime import datetime, timedelta, date
 import calendar as calendar_module
 from django.conf import settings
@@ -152,13 +151,6 @@ class Calendar(models.Model):
 
     def __str__(self):
         return self.summary +'#'+ self.user.username
-
-
-class CalendarAdmin(admin.ModelAdmin):
-    pass
-
-
-admin.site.register(Calendar, CalendarAdmin)
 
 
 class Event(models.Model):

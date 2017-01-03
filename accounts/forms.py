@@ -5,15 +5,32 @@ from django.contrib.auth import (
     get_user_model,
     authenticate
 )
+from django.utils.translation import ugettext_lazy as _
 
 User = get_user_model()
 
 
 class UserLoginForm(forms.Form):
-    email    = forms.EmailField()
-    password = forms.CharField(widget=forms.PasswordInput)
+    email    = forms.EmailField(label='Email')
+    password = forms.CharField(widget=forms.PasswordInput, label='password')
 
-    def clean(self, *args, **kwargs):
+
+    def clean_email(self):
+        email = self.cleaned_data.get('email')
+        password = self.cleaned_data.get('password')
+
+        if email:
+            try:
+                username = User.objects.get(email=email).username
+                user     = authenticate(username=username, password=password)
+
+            except User.DoesNotExist as e:
+                raise forms.ValidationError(_("There's no user with such email"))
+
+        return email
+
+
+    def clean_password(self):
         email    = self.cleaned_data.get('email')
         password = self.cleaned_data.get('password')
 
@@ -21,23 +38,25 @@ class UserLoginForm(forms.Form):
             username = User.objects.get(email=email).username
             user = authenticate(username=username, password=password)
 
-            if not user:
-                raise forms.ValidationError('this user doesnot exist')
+            if user is None:
+                raise forms.ValidationError(_("Incorrect password."))
 
             if not user.check_password(password):
-                raise forms.ValidationError("incorrect password ")
+                raise forms.ValidationError(_("Incorrect password."))
 
-            if not user.is_active:
-                raise forms.ValidationError("user is no longer active")
+        return password
+
+
+    def clean(self, *args, **kwargs):
+        email    = self.cleaned_data.get('email')
+        password = self.cleaned_data.get('password')
 
         return super(UserLoginForm, self).clean(*args, **kwargs)
 
 
-class UserRegistraterForm(forms.ModelForm):
-
-    email = forms.EmailField(label='Enter email')
-    password = forms.CharField(widget=forms.PasswordInput)
-
+class UserRegistrationForm(forms.ModelForm):
+    email = forms.EmailField(label='Email')
+    password = forms.CharField(widget=forms.PasswordInput, label='Password')
 
     class Meta:
         model = User
@@ -46,12 +65,13 @@ class UserRegistraterForm(forms.ModelForm):
             'password',
         ]
 
-    def clean_email2(self):
+    def clean_email(self):
         email = self.cleaned_data.get('email')
-        email_qs = User.objects.filter(email=email)
+        if get_user_model().objects.filter(email=email).exists():
+            raise forms.ValidationError(_("User with such email already exists."))
 
-        if email_qs.exists():
-            raise forms.ValidationError("This email has already been used")
+        email_domain = email.split('@')[1]
+        if email_domain != 'gmail.com':
+            raise forms.ValidationError(_("Please, enter your gmail address"))
 
         return email
-
