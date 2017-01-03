@@ -1782,7 +1782,7 @@
 	}
 
 	a {
-		color: #e5474b;
+		color: #9896A4;
 	}
 
 	strong, b {
@@ -2444,6 +2444,7 @@
 				display: inline-block;
 				padding: 0 1em 0 0;
 				vertical-align: middle;
+				color: #a3a3c2;
 			}
 
 				ul.actions li:last-child {
@@ -3152,7 +3153,7 @@
 		}
 
 			#header .logo:hover {
-				color: #8192A8;
+				color: #91A8D0;
 			}
 
 		#header a {

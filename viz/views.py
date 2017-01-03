@@ -43,7 +43,6 @@ def viz(request):
                                  [form.cleaned_data['period']],
                                  keywords_,                                 
                                 )
-        S = form.cleaned_data['period']
                             
         return render(request, 'viz/viz.html', {'form'  : form, 
                                                 'images': images,

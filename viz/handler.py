@@ -8,12 +8,13 @@ import matplotlib.dates as mdates
 from datetime import datetime, timedelta, date
 import calendar as calendar_module
 from django.conf import settings
-from django.db.models import Q
-from apiclient import discovery
+from django.db.models import Q      # to make complicated queries
+from functools import reduce        # same as above
+from apiclient import discovery     # to call google API
 from .models import Calendar, Event
 from gauth.models import CredentialsModel
 from django.contrib.auth.models import User
-from functools import reduce
+
 
 PERIODS = ['this_month', 'this_30_days','this_week']
 PERIOD_TO_TYPES = {'this_month'    : ['bar', 'sum-bar'],
@@ -22,6 +23,13 @@ PERIOD_TO_TYPES = {'this_month'    : ['bar', 'sum-bar'],
                   }
            
 def check_path(username, period_type, filename):
+    """
+    will create a path for the image (string) if such image 
+    already exists will delete it
+    returns
+        (full_path, iamge_path) : (string, string) second string is path to image
+            as a static file
+     """
     user_static_folder = 'graphs/'+username+'/'
     full_path  = os.path.join(settings.STATIC_ROOT, user_static_folder)
     if not os.path.exists(full_path):

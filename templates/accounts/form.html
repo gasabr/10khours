@@ -56,6 +56,17 @@
         </div>
       </div>
 
+      {% if title == "Registration" %}
+        <div class="col-sm-offset-2 col-sm-10">
+          <a href="{% url 'login' %}">Already have an account?</a>
+        </div>
+      {% endif %}
+      {% if title == "Log in" %}
+        <div class="col-sm-offset-2 col-sm-10">
+          <a href="{% url 'register' %}">Don't have an account?</a>
+        </div>
+      {% endif %}
+
       <!-- Button -->
       <div class="form-group">
         <div class="col-sm-offset-2 col-sm-10">

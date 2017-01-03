@@ -38,7 +38,11 @@ WARNING: Respond.js doesn't work if you view the page via file://
 			<a href="{% url 'home' %}" class="logo">10kHours</a>
 			<nav id="nav">
 				<a href="{% url 'home' %}">Home</a>
-				<a href="{% url 'viz' %}">Visualisation</a>
+        {% if user.is_authenticated %}
+				<a href="{% url 'logout' %}">log out</a>
+        {% else %}
+        <a href="{% url 'login' %}">log in</a>
+        {% endif %}
 			</nav>
 		</div>
 		<a href="#menu" class="navPanelToggle"><span class="fa fa-bars"></span></a> 
