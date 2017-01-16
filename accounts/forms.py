@@ -1,11 +1,13 @@
 from django import forms
+from django.db import models
 from django.contrib.auth import (
     login,
     logout,
     get_user_model,
-    authenticate
+    authenticate,
 )
 from django.utils.translation import ugettext_lazy as _
+from .models import Schedule
 
 User = get_user_model()
 
@@ -75,3 +77,14 @@ class UserRegistrationForm(forms.ModelForm):
             raise forms.ValidationError(_("Please, enter your gmail address"))
 
         return email
+
+
+class ScheduleForm(forms.ModelForm):
+    """Form to handle creation and changing of mailing schedule."""
+    formfield_overrides = {
+        models.DateField: {'widget': forms.SelectDateWidget}
+    }
+
+    class Meta:
+        model = Schedule
+        fields = ['start', 'end', 'repeat', 'periods']

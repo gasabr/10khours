@@ -16,7 +16,7 @@ Including another URLconf
 from django.conf.urls import url, include
 from django.contrib import admin
 from gauth import views
-from accounts.views import (login_view, logout_view, register_view)
+from accounts.views import (login_view, logout_view, register_view, schedule_view)
 from viz.views import viz
 # for managing static files
 from django.conf import settings
@@ -30,6 +30,7 @@ urlpatterns = [
     url(r'^accounts/login/', login_view, name='login'), # why do i need accounts here?
     url(r'^register/', register_view, name='register'),
     url(r'^logout/', logout_view, name='logout'),
+    url(r'^schedule/', schedule_view, name='schedule'),
 
     url(r'^get_creds/', views.get_creds, name='get_creds'),
     url(r'^oauth2/redirect/', views.oauth2redirect, name='oauth2redirect'),

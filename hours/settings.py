@@ -13,6 +13,7 @@ https://docs.djangoproject.com/en/1.10/ref/settings/
 import os
 from YamJam import yamjam
 
+
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -33,6 +34,13 @@ SECRET_KEY = yamjam(os.path.join(ROOT_DIR, '.yamjam/config.yaml'))['hours']['DJA
 GOOGLE_OAUTH2_CLIENT_ID = yamjam(os.path.join(ROOT_DIR, '.yamjam/config.yaml'))['hours']['GOOGLE_CLIENT_ID']
 GOOGLE_OAUTH2_CLIENT_SECRET = yamjam(os.path.join(ROOT_DIR, '.yamjam/config.yaml'))['hours']['GOOGLE_CLIENT_SECRET']
 
+# SMPT settings
+EMAIL_HOST = 'smtp.beget.com'
+EMAIL_PORT = 25
+EMAIL_HOST_USER = yamjam(os.path.join(ROOT_DIR, '.yamjam/config.yaml'))['hours']['user']
+EMAIL_HOST_PASSWORD = yamjam(os.path.join(ROOT_DIR, '.yamjam/config.yaml'))['hours']['password']
+EMAIL_USE_TLS = True
+
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -45,7 +53,7 @@ if LOCAL:
 else:
     GOOGLE_REDIRECT = 'http://10khours.ru/oauth2/redirect/'
     STATIC_URL ='/static/'
-    
+
 ALLOWED_HOSTS = ['10khours.ru']
 
 
@@ -58,6 +66,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django_celery_beat',
+    # 'djcelery',
     'gauth',
     'accounts',
     'viz',

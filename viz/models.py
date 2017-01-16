@@ -19,11 +19,11 @@ def get_duration(event):
         start = event['r_start']['dateTime']
         end   = event['r_end']['dateTime']
     except KeyError:
-        # +03:00 will crash the program for not UTC+3 users
+        # TODO: +03:00 will crash the program for not UTC+3 users
         start = datetime.strptime(event['start']['dateTime'], '%Y-%m-%dT%H:%M:%S+03:00')
         end   = datetime.strptime(event['end']['dateTime'], '%Y-%m-%dT%H:%M:%S+03:00')
     return float((end-start).seconds / 60) / 60
-    
+
 
 def clear_event(event):
     """
@@ -34,31 +34,32 @@ def clear_event(event):
     # remove cancelled events
     if event['status'] == 'cancelled':
         return ()
-                    
+
     # remove all day events
     if 'date' in event['start'].keys():
         return ()
-                
+
     # parsing start and end to datetime
     start_dt = datetime.strptime(event['start']['dateTime'][:-6], '%Y-%m-%dT%H:%M:%S')
     end_dt   = datetime.strptime(event['end']['dateTime'][:-6], '%Y-%m-%dT%H:%M:%S')
-    
+
     return (start_dt, end_dt)
-            
+
     # for recurrent events (old API version)
     if 'recurrence' in event.keys():
         return ()
-        
-    # for recurrent events (new API version) 
+
+    # for recurrent events (new API version)
     elif 'originalStartTime' in event.keys():
         Start = datetime.strptime(event['originalStartTime']['dateTime'][:-6], '%Y-%m-%dT%H:%M:%S')
-        End   = Start + (end_dt - start_dt) 
+        End   = Start + (end_dt - start_dt)
         return (Start, End)
     else:
         return (start_dt, end_dt)
 
+
 class CalendarManager(models.Manager):
-    
+
     def update_calendars(self, username):
         self.user = User.objects.get(username=username)
         self.creds = CredentialsModel.objects.get(id__username=username).credentials
@@ -76,28 +77,28 @@ class CalendarManager(models.Manager):
             try:
                 Calendar.objects.get(id=c['id'])
             except Calendar.DoesNotExist:
-                new_calendar = Calendar.objects.create(id=c['id'], 
-                                                       user=self.user, 
-                                                       summary=c['summary'])                                      
+                new_calendar = Calendar.objects.create(id=c['id'],
+                                                       user=self.user,
+                                                       summary=c['summary'])
                 new_calendar.save()
-                
-    
+
+
     def sync_events(self, calendar_id):
         """
         takes array of calendars ids and time interval
         returns {'calendar_id': [events,...,]}
         """
         bad_recurrence = []
-        # calendars_ids = [r.id for r in Calendar.objects.filter(user__username=self.user.username)]
+
         calendar = Calendar.objects.get(id=calendar_id)
         timeMax  = (datetime.now() + timedelta(days=31)).isoformat() + 'Z'
         timeMin  = (datetime.now() - timedelta(days=31)).isoformat() + 'Z'
         items    = self.service.events().list(calendarId=calendar_id,
                                              timeMin=timeMin,
                                             ).execute().get('items', [])
-                                            
+
         performed_icaluids = set()
-        
+
         for i in items:
             # check event update time in db
             try:
@@ -116,7 +117,7 @@ class CalendarManager(models.Manager):
                     performed_icaluids.add(i['iCalUID'])
                     for r in rec_items:
                         items.append(r)
-                            
+
                 # create new event
                 cleaned_date = clear_event(i)
                 if len(cleaned_date) == 0:
@@ -132,10 +133,10 @@ class CalendarManager(models.Manager):
                                                  end=cleaned_date[1],
                                                  duration=duration,
                                                  updated=datetime.strptime(i['updated'][:-5], '%Y-%m-%dT%H:%M:%S'))
-                                                 
+
                 new_event.save()
-        
-        
+
+
     def get_calendars_summary(self):
         """
         returns [(id, name), ...,] for each calendar in db for given user
@@ -144,8 +145,9 @@ class CalendarManager(models.Manager):
 
 
 class Calendar(models.Model):
+    """Model to store Google Calendar info"""
     id      = models.CharField(max_length=150, primary_key=True)
-    summary = models.CharField(max_length=100) 
+    summary = models.CharField(max_length=100)
     user    = models.ForeignKey(User, on_delete=models.CASCADE)
     objects = CalendarManager()
 
@@ -154,6 +156,7 @@ class Calendar(models.Model):
 
 
 class Event(models.Model):
+    """Model to store single event info"""
     id       = models.CharField(max_length=100, primary_key=True)
     icaluid  = models.CharField(max_length=100)
     summary  = models.CharField(max_length=150)
@@ -162,7 +165,6 @@ class Event(models.Model):
     duration = models.FloatField()
     calendar = models.ForeignKey(Calendar, on_delete=models.CASCADE)
     updated  = models.DateTimeField()
-    
+
     def __str__(self):
         return self.summary
-    

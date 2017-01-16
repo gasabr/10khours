@@ -1,0 +1,18 @@
+{% extends "gauth/base.html" %}
+
+{% block title %}Your profile{% endblock title %}
+
+{% block main %}
+{% load static %}
+
+<form class="form-inline" method="GET" action="">
+  {{ form.as_p }}
+
+  {{ message }}
+  <div class="form-group">
+    <label for="id_apply" class="form-label"><br></label>
+    <input type=submit value="Create schedule">
+  </div>
+</form>
+
+{% endblock main %}
