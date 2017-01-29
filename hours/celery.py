@@ -37,7 +37,7 @@ def check_schedules(arg):
     # send emails
 
     # refresh next_run
-    new_next_run = s.next_run + get_delta(s.repeat)
+    # new_next_run = s.next_run + get_delta(s.repeat)
 
     print(len(to_send))
 
