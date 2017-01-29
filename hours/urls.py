@@ -37,4 +37,5 @@ urlpatterns = [
     url(r'^admin/', include(admin.site.urls)),
 
     url(r'^viz/', viz, name='viz'),
-] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+]
+# + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

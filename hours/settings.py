@@ -45,14 +45,21 @@ EMAIL_USE_TLS = True
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False # TODO load static then debug=False
 
-LOCAL = True
+LOCAL = False
 
 if LOCAL:
     GOOGLE_REDIRECT = 'http://127.0.0.1:8000/oauth2/redirect/'
     STATIC_URL ='static/'
+    STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 else:
     GOOGLE_REDIRECT = 'http://10khours.ru/oauth2/redirect/'
-    STATIC_URL ='/static/'
+    STATIC_URL = None
+    STATIC_ROOT = os.path.join(os.path.dirname(BASE_DIR), 'public_html')
+    
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, 'static'),
+    os.path.join(os.path.dirname(BASE_DIR), 'public_html')
+]
 
 ALLOWED_HOSTS = ['10khours.ru']
 
@@ -154,9 +161,3 @@ USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.10/howto/static-files/
-
-STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, "static"),
-]
-
-STATIC_ROOT = os.path.join(BASE_DIR, 'static')
